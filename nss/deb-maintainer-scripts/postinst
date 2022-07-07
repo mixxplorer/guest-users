@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -e
+
+# Only add entries to nsswitch.conf if there are none
+if ! grep guest_users /etc/nsswitch.conf > /dev/null; then
+    sed -i '/^passwd:/ s/$/ guest_users/' /etc/nsswitch.conf
+    sed -i '/^group:/ s/$/ guest_users/' /etc/nsswitch.conf
+    sed -i '/^shadow:/ s/$/ guest_users/' /etc/nsswitch.conf
+fi

@@ -1,0 +1,3 @@
+# Allow programs performing authentication to read/write to guest-users auth databases as the NSS module requires it.
+# Otherwise, users do not appear in groups, which could lead to nasty bugs.
+  /etc/guest-users/public.db rk,

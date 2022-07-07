@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -e
+
+pam-auth-update --disable guest-users --package

@@ -1,0 +1,80 @@
+image: dr.rechenknecht.net/bauhelfer/container/main/rust:ubuntu-jammy
+
+stages:
+  - prepare
+  - build
+  - lint
+  - publish
+
+variables:
+  # This will instruct Docker not to start over TLS.
+  DOCKER_TLS_CERTDIR: ""
+  PACKAGE_BASE_VERSION: "0.1"
+
+prepare-rs:
+  stage: prepare
+  needs: []
+  script:
+     - export COMMIT_COUNT=`git rev-list --count HEAD`
+     - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" pam/Cargo.toml
+     - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" nss/Cargo.toml
+     - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" guest-users-lib/Cargo.toml
+  artifacts:
+    paths:
+      - pam/Cargo.toml
+      - nss/Cargo.toml
+      - guest-users-lib/Cargo.toml
+    expire_in: 1 week
+    when: always
+
+lint-rs:
+  stage: lint
+  needs:
+    - build-rs
+  script:
+    - apt-get update
+    - apt-get install -q -y libsqlite3-dev libclang-dev libpam-dev libnss3-dev
+    - rustup component add clippy
+    - cargo clippy -- -Dwarnings
+    - rustup component add rustfmt
+    - cargo fmt --all -- --check
+
+build-rs:
+  stage: build
+  needs:
+    - prepare-rs
+  script:
+    # Allow getting schema.rs as artifact
+    - rm guest-users-lib/src/db/.gitignore
+    - apt-get update
+    - apt-get install -q -y libsqlite3-dev dpkg dpkg-dev liblzma-dev libclang-dev libpam-dev libnss3-dev
+    - cargo install cargo-deb
+    - cargo install diesel_cli --no-default-features --features "sqlite"
+    - diesel migration run --database-url=guest_users.db --config-file guest-users-lib/diesel.toml --migration-dir guest-users-lib/migrations
+    - cargo build --release
+    - cargo deb -p guest-users-pam
+    - cargo deb -p guest-users-nss
+    - cargo deb -p guest-users-lib
+  artifacts:
+    paths:
+      - target/debian
+      - guest-users-lib/src/db/schema.rs
+    expire_in: 1 week
+    when: always
+
+pages:
+  stage: publish
+  needs:
+    - build-rs
+  script:
+    - apt-get update
+    - apt-get install -y dpkg-dev
+    - mkdir -p public/packages/release/main
+    - cd public/packages/release/main
+    - cp -av ../../../../target/debian/*.deb .
+    - dpkg-scanpackages -m . | gzip > Packages.gz
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

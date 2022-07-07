@@ -1,0 +1,34 @@
+[package]
+name = "guest-users-lib"
+version = "0.0.0-dev"
+authors = ["Leonard Marschke <leo@mixxplorer.de>"]
+edition = "2018"
+description = "Guest users support, common files"
+license = "MIT"
+
+[package.metadata.deb]
+name = "guest-users"
+maintainer = "Leonard Marschke <leo@mixxplorer.de>"
+copyright = "2023, Leonard Marschke <leo@mixxplorer.de>"
+license-file = ["../LICENSE", "2"]
+extended-description = """Guest user support\
+Bringing guest users onto your machine.
+
+This package provides common files to be used with other guest users packages."""
+depends = "guest-users-pam,guest-users-nss"
+maintainer-scripts = "deb-maintainer-scripts"
+section = "utility"
+priority = "optional"
+assets = [
+    ["deb-raw/etc/apparmor.d/abstractions/authentication.d/guest-users", "etc/apparmor.d/abstractions/authentication.d/guest-users", "644"],
+    ["deb-raw/etc/apparmor.d/cups-client.d/guest-users", "etc/apparmor.d/cups-client.d/guest-users", "644"],
+]
+
+[dependencies]
+anyhow = "1.0.44"
+log = "^0.4.5"
+config = "0.13.1"
+diesel = { version = "1.4", features = ["sqlite", "chrono"] }
+diesel_migrations = "1.4"
+nix = "0.24.1"
+simple_logger = "1.13.0"
