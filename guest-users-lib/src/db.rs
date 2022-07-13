@@ -165,11 +165,13 @@ impl<'a> DB<'a> {
 
         let home_base_path = &self.global_settings.home_base_path;
         let (user_id, username) = self.find_next_unused_user_id_and_name()?;
+        let current_boot_id = crate::helper::get_current_os_boot_id()?;
         let target_user = models::User {
             id: user_id,
             user_group_id: group_id,
             user_name: username.clone(),
             home_path: format!("{}/{}", home_base_path, username),
+            boot_id: current_boot_id,
         };
 
         if Path::new(&target_user.home_path).exists() {
