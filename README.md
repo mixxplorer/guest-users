@@ -43,10 +43,14 @@ You can set the following configuration options:
 | `home_base_path` | `/tmp/guest-users-home` | Base path for guest home directories |
 | `guest_shell` | `/bin/bash` | Shell, which will be used for all guest users |
 | `public_database_path` | `/etc/guest-users/public.db` | Database path for guest users (sqlite) |
-| `uid_minimum` | `31000` | Minimum UID for guest users |
+| `uid_minimum` | `31001` | Minimum UID for guest users |
 | `uid_maximum` | `31999` | Maximum UID for guest users |
-| `gid_minimum` | `31000` | Minimum GID for individual default groups of guest users |
+| `gid_minimum` | `31001` | Minimum GID for individual default groups of guest users |
 | `gid_maximum` | `31999` | Maximum GID for individual default groups guest users |
+| `enable_ghost_user` | `true` | Whether to enable a ghost user which will be shown e.g. on login screens |
+| `ghost_user_gecos_username` | `Guest` | The name the user will be shown on login screen |
+| `ghost_user_uid` | `31000` | UID for ghost user |
+| `ghost_user_gid` | `31000` | GID for ghost user |
 
 ## Development setup
 

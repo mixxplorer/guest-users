@@ -12,6 +12,9 @@ macro_rules! config_default_item {
     ( $z:expr, $a:ident, i64 ) => {
         $z.get_int(stringify!($a))?
     };
+    ( $z:expr, $a:ident, bool ) => {
+        $z.get_bool(stringify!($a))?
+    };
 }
 
 /// Wrapper for having a config object pre-filled with default values when building via Config::default from a ConfigBuilder
@@ -50,10 +53,14 @@ config_default!(
     home_base_path, String, "/tmp/guest-users-home",
     guest_shell, String, "/bin/bash",
     public_database_path, String, "/etc/guest-users/public.db",
-    uid_minimum, i64, 31000,
+    uid_minimum, i64, 31001,
     uid_maximum, i64, 31999,
-    gid_minimum, i64, 31000,
-    gid_maximum, i64, 31999
+    gid_minimum, i64, 31001,
+    gid_maximum, i64, 31999,
+    enable_ghost_user, bool, true,
+    ghost_user_gecos_username, String, "Guest",
+    ghost_user_uid, i64, 31000,
+    ghost_user_gid, i64, 31000
 );
 
 pub fn get_config() -> Result<Config> {
