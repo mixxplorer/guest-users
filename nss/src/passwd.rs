@@ -1,6 +1,6 @@
 use std::convert::{TryFrom, TryInto};
 
-use anyhow::Error;
+use anyhow::{Context, Error};
 use libnss::interop::Response;
 use libnss::passwd::Passwd;
 
@@ -31,8 +31,14 @@ fn get_ghost_user(
     Ok(Some(Passwd {
         name: global_settings.guest_username_new_user,
         passwd: "x".to_string(), // no password set
-        uid: global_settings.ghost_user_uid.try_into()?,
-        gid: global_settings.ghost_user_gid.try_into()?,
+        uid: global_settings
+            .ghost_user_uid
+            .try_into()
+            .context("Unable to pare ghost user uid as u32")?,
+        gid: global_settings
+            .ghost_user_gid
+            .try_into()
+            .context("Unable to pare ghost user gid as u32")?,
         gecos: format!("{},,,", global_settings.ghost_user_gecos_username), // set username in gecos
         dir: "/dev/null".to_string(),
         shell: "/bin/false".to_string(),

@@ -52,6 +52,8 @@ You can set the following configuration options:
 | `ghost_user_uid` | `31000` | UID for ghost user |
 | `ghost_user_gid` | `31000` | GID for ghost user |
 
+When you change ghost user related settings, it is necessary to either reboot the machine or alternatively run `guest-users-sync-accountsservice` manually.
+
 ## Development setup
 
 For building the project, it is required to have some development dependencies. On Debian/Ubuntu you can install them via apt:
@@ -81,5 +83,5 @@ This project makes use of the cargo package manager. To build, just execute `car
 To build all the Debian packages, you can make use of this one-liner:
 
 ```bash
-cargo deb -p guest-users-pam && cargo deb -p guest-users-nss && cargo deb -p guest-users-lib
+cargo deb -p guest-users-pam && cargo deb -p guest-users-nss && cargo deb -p guest-users-lib && cargo deb -p guest-users-sync-accountsservice
 ```

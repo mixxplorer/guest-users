@@ -1,5 +1,5 @@
 [workspace]
-members = ["guest-users-lib", "pam", "nss"]
+members = ["guest-users-lib", "pam", "nss", "sync-accountsservice"]
 
 [profile.release]
 # Add some settings for shrinking the binary size significantly for release builds

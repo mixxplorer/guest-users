@@ -1,0 +1,36 @@
+[package]
+name = "guest-users-sync-accountsservice"
+version = "0.0.0-dev"
+authors = ["Leonard Marschke <leo@mixxplorer.de>"]
+edition = "2018"
+description = "Guest users support, accounts service sync"
+license = "MIT"
+
+
+[package.metadata.deb]
+maintainer = "Leonard Marschke <leo@mixxplorer.de>"
+copyright = "2023, Leonard Marschke <leo@mixxplorer.de>"
+license-file = ["../LICENSE", "2"]
+extended-description = """Guest user support, sync users to accounts service\
+Bringing guest users onto your machine.
+
+With this module, you can sync guest users (ghost users) to your accounts service."""
+depends = "guest-users"
+maintainer-scripts = "deb-maintainer-scripts"
+suggests = "guest-users-pam, guest-users-nss"
+section = "utility"
+priority = "optional"
+assets = [
+    ["target/release/guest-users-sync-accountsservice", "usr/bin/guest-users-sync-accountsservice", "755"],
+]
+systemd-units = { unit-scripts = "deb-services", enable = true }
+
+[dependencies]
+guest-users-lib = { path="../guest-users-lib" }
+anyhow = "1.0.44"
+log = "^0.4.5"
+simple_logger = "1.13.0"
+clap = { version = "3.2.11", features = ["derive"] }
+clap-verbosity-flag = "1.0.1"
+zbus = "2.3.2"
+futures = "0.3.21"

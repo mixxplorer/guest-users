@@ -15,7 +15,7 @@ extended-description = """Guest user support\
 Bringing guest users onto your machine.
 
 This package provides common files to be used with other guest users packages."""
-depends = "guest-users-pam,guest-users-nss"
+depends = "guest-users-pam,guest-users-nss,guest-users-sync-accountsservice"
 maintainer-scripts = "deb-maintainer-scripts"
 section = "utility"
 priority = "optional"
