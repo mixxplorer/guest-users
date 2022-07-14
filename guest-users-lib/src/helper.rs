@@ -49,6 +49,7 @@ macro_rules! config_default {
 config_default!(
     guest_username_new_user, String, "guest",
     guest_username_prefix, String, "guest",
+    guest_username_human_readable_prefix, String, "Guest",
     guest_group_name_prefix, String, "guest",
     home_base_path, String, "/tmp/guest-users-home",
     guest_shell, String, "/bin/bash",
