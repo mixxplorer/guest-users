@@ -20,12 +20,14 @@ prepare-rs:
      - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" nss/Cargo.toml
      - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" guest-users-lib/Cargo.toml
      - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" sync-accountsservice/Cargo.toml
+     - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" guest-warning/Cargo.toml
   artifacts:
     paths:
       - guest-users-lib/Cargo.toml
       - nss/Cargo.toml
       - pam/Cargo.toml
       - sync-accountsservice/Cargo.toml
+      - guest-warning/Cargo.toml
     expire_in: 1 week
     when: always
 

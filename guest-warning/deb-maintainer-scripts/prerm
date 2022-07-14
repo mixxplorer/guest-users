@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -e
+
+systemctl --global disable guest-users-guest-warning

@@ -1,0 +1,36 @@
+[package]
+name = "guest-users-guest-warning"
+version = "0.0.0-dev"
+authors = ["Leonard Marschke <leo@mixxplorer.de>"]
+edition = "2018"
+description = "Guest users support, show a data persistency warning to guest users"
+license = "MIT"
+
+
+[package.metadata.deb]
+maintainer = "Leonard Marschke <leo@mixxplorer.de>"
+copyright = "2023, Leonard Marschke <leo@mixxplorer.de>"
+license-file = ["../LICENSE", "2"]
+extended-description = """Guest user support, show a guest user warning message\
+Bringing guest users onto your machine.
+
+With this module, guest users will see a warning about the lack of data persistency after login."""
+depends = "guest-users"
+maintainer-scripts = "deb-maintainer-scripts"
+section = "utility"
+priority = "optional"
+assets = [
+    ["target/release/guest-users-guest-warning", "usr/bin/guest-users-guest-warning", "755"],
+    ["deb-services/guest-users-guest-warning.service", "usr/lib/systemd/user/guest-users-guest-warning.service", "644"],
+]
+
+[dependencies]
+guest-users-lib = { path="../guest-users-lib" }
+anyhow = "1.0.44"
+log = "^0.4.5"
+simple_logger = "1.13.0"
+clap = { version = "3.2.11", features = ["derive"] }
+clap-verbosity-flag = "1.0.1"
+zbus = "2.3.2"
+futures = "0.3.21"
+nix = "0.24.1"
