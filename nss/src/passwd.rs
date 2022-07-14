@@ -28,18 +28,27 @@ fn get_ghost_user(
         return Ok(None);
     }
 
+    // Set human readable username
+    let gecos = crate::gecos::Gecos {
+        full_name: Some(global_settings.ghost_user_gecos_username),
+        room_number: None,
+        work_phone: None,
+        home_phone: None,
+        other: None,
+    };
+
     Ok(Some(Passwd {
         name: global_settings.guest_username_new_user,
         passwd: "x".to_string(), // no password set
         uid: global_settings
             .ghost_user_uid
             .try_into()
-            .context("Unable to pare ghost user uid as u32")?,
+            .context("Unable to parse ghost user uid as u32")?,
         gid: global_settings
             .ghost_user_gid
             .try_into()
-            .context("Unable to pare ghost user gid as u32")?,
-        gecos: format!("{},,,", global_settings.ghost_user_gecos_username), // set username in gecos
+            .context("Unable to parse ghost user gid as u32")?,
+        gecos: gecos.to_gecos_string(),
         dir: "/dev/null".to_string(),
         shell: "/bin/false".to_string(),
     }))
