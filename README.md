@@ -37,16 +37,16 @@ You can set the following configuration options:
 
 | Option | Default value | Description |
 |:------:|:-------------:|:-----------:|
-| `GUEST_USERNAME_NEW_USER` | `guest` | The username, which can be used to create a new guest user during login |
-| `GUEST_USERNAME_PREFIX` | `guest` | A prefix all guest usernames are prepended with |
-| `GUEST_GROUP_NAME_PREFIX` | `guest` | A prefix all guest group names are prepended with |
-| `HOME_BASE_PATH` | `/tmp/guest-users-home` | Base path for guest home directories |
-| `GUEST_SHELL` | `/bin/bash` | Shell, which will be used for all guest users |
-| `GUEST_USER_DATABASE_PATH` | `/etc/guest-users/public.db` | Database path for guest users (sqlite) |
-| `UID_MINIMUM` | `31000` | Minimum UID for guest users |
-| `UID_MAXIMUM` | `31999` | Maximum UID for guest users |
-| `GID_MINIMUM` | `31000` | Minimum GID for individual default groups of guest users |
-| `GID_MAXIMUM` | `31999` | Maximum GID for individual default groups guest users |
+| `guest_username_new_user` | `guest` | The username, which can be used to create a new guest user during login |
+| `guest_username_prefix` | `guest` | A prefix all guest usernames are prepended with |
+| `guest_group_name_prefix` | `guest` | A prefix all guest group names are prepended with |
+| `home_base_path` | `/tmp/guest-users-home` | Base path for guest home directories |
+| `guest_shell` | `/bin/bash` | Shell, which will be used for all guest users |
+| `public_database_path` | `/etc/guest-users/public.db` | Database path for guest users (sqlite) |
+| `uid_minimum` | `31000` | Minimum UID for guest users |
+| `uid_maximum` | `31999` | Maximum UID for guest users |
+| `gid_minimum` | `31000` | Minimum GID for individual default groups of guest users |
+| `gid_maximum` | `31999` | Maximum GID for individual default groups guest users |
 
 ## Development setup
 

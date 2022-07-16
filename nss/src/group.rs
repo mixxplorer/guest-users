@@ -24,7 +24,7 @@ fn db_to_group(
 }
 
 pub fn get_all_entries() -> Result<Response<Vec<Group>>, Error> {
-    let global_settings = guest_users_lib::helper::load_settings()?;
+    let global_settings = guest_users_lib::helper::get_config()?;
     let db = guest_users_lib::db::DB::new(&global_settings)?;
 
     let users = db.get_groups()?;
@@ -38,7 +38,7 @@ pub fn get_all_entries() -> Result<Response<Vec<Group>>, Error> {
 }
 
 pub fn get_entry_by_gid(gid: libc::uid_t) -> Result<Response<Group>, Error> {
-    let global_settings = guest_users_lib::helper::load_settings()?;
+    let global_settings = guest_users_lib::helper::get_config()?;
     let db = guest_users_lib::db::DB::new(&global_settings)?;
 
     if let Some(user) = db.find_group_by_id(i32::try_from(gid)?)? {
@@ -49,7 +49,7 @@ pub fn get_entry_by_gid(gid: libc::uid_t) -> Result<Response<Group>, Error> {
 }
 
 pub fn get_entry_by_name(name: &str) -> Result<Response<Group>, Error> {
-    let global_settings = guest_users_lib::helper::load_settings()?;
+    let global_settings = guest_users_lib::helper::get_config()?;
     let db = guest_users_lib::db::DB::new(&global_settings)?;
 
     if let Some(user) = db.find_group_by_name(name)? {

@@ -5,7 +5,7 @@ use libnss::interop::Response;
 use libnss::passwd::Passwd;
 
 fn db_to_passwd(
-    global_settings: &config::Config,
+    global_settings: &guest_users_lib::helper::Config,
     user: &guest_users_lib::db::models::User,
 ) -> Result<Passwd, Error> {
     let new_passwd_user = Passwd {
@@ -15,14 +15,14 @@ fn db_to_passwd(
         gid: user.user_group_id as u32,
         gecos: "".to_string(), // empty gecos as we don't have any infos about the user
         dir: user.home_path.clone(),
-        shell: global_settings.get_string("GUEST_SHELL")?,
+        shell: global_settings.guest_shell.clone(),
     };
 
     Ok(new_passwd_user)
 }
 
 pub fn get_all_entries() -> Result<Response<Vec<Passwd>>, Error> {
-    let global_settings = guest_users_lib::helper::load_settings()?;
+    let global_settings = guest_users_lib::helper::get_config()?;
     let db = guest_users_lib::db::DB::new(&global_settings)?;
 
     let users = db.get_users()?;
@@ -36,7 +36,7 @@ pub fn get_all_entries() -> Result<Response<Vec<Passwd>>, Error> {
 }
 
 pub fn get_entry_by_uid(uid: libc::uid_t) -> Result<Response<Passwd>, Error> {
-    let global_settings = guest_users_lib::helper::load_settings()?;
+    let global_settings = guest_users_lib::helper::get_config()?;
     let db = guest_users_lib::db::DB::new(&global_settings)?;
 
     if let Some(user) = db.find_user_by_id(i32::try_from(uid)?)? {
@@ -47,7 +47,7 @@ pub fn get_entry_by_uid(uid: libc::uid_t) -> Result<Response<Passwd>, Error> {
 }
 
 pub fn get_entry_by_name(name: &str) -> Result<Response<Passwd>, Error> {
-    let global_settings = guest_users_lib::helper::load_settings()?;
+    let global_settings = guest_users_lib::helper::get_config()?;
     let db = guest_users_lib::db::DB::new(&global_settings)?;
 
     if let Some(user) = db.find_user_by_name(name)? {

@@ -14,7 +14,7 @@ pub fn account_management(
     let login_user = pam::get_user(handle, Some("login"))?;
     log::trace!("login_user={}", login_user);
 
-    let global_settings = guest_users_lib::helper::load_settings()?;
+    let global_settings = guest_users_lib::helper::get_config()?;
     let db = guest_users_lib::db::DB::new(&global_settings)?;
 
     if db.find_user_by_name(login_user)?.is_some() {
@@ -38,8 +38,8 @@ pub fn authenticate(
     _args: Vec<&std::ffi::CStr>,
     _flags: std::os::raw::c_uint,
 ) -> Result<PamReturnCode, Error> {
-    let global_settings = guest_users_lib::helper::load_settings()?;
-    let guest_username_new_user = global_settings.get_string("GUEST_USERNAME_NEW_USER")?;
+    let global_settings = guest_users_lib::helper::get_config()?;
+    let guest_username_new_user = &global_settings.guest_username_new_user;
     log::debug!("PAM handle={:?}", handle);
     let login_username = pam::get_user(handle, Some("login"))?;
 

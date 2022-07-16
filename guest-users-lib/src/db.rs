@@ -17,7 +17,6 @@ use std::path::Path;
 
 use anyhow::Context;
 use anyhow::Error;
-use config::Config;
 
 use nix::unistd::chown;
 use nix::unistd::geteuid;
@@ -25,6 +24,8 @@ use nix::unistd::Gid;
 use nix::unistd::Group;
 use nix::unistd::Uid;
 use nix::unistd::User;
+
+use crate::helper::Config;
 
 pub struct DB<'a> {
     conn: diesel::SqliteConnection,
@@ -34,10 +35,8 @@ pub struct DB<'a> {
 impl<'a> DB<'a> {
     pub fn new(global_settings: &'a Config) -> Result<Self, Error> {
         log::trace!("Creating new DB object");
-        let database_url = global_settings
-            .get_string("GUEST_USER_DATABASE_PATH")
-            .context("GUEST_USER_DATABASE_PATH in config not set")?;
-        let conn = diesel::SqliteConnection::establish(&database_url)
+        let database_url = &global_settings.public_database_path;
+        let conn = diesel::SqliteConnection::establish(database_url)
             .with_context(|| format!("Cannot connect to database {}", database_url))?;
         conn.execute("PRAGMA foreign_keys = ON")?;
         log::trace!("Enabled foreign key check on DB");
@@ -69,12 +68,8 @@ impl<'a> DB<'a> {
         use schema::users::dsl::*;
 
         // find next unused ID
-        let mut max_user_id: i32 = (self
-            .global_settings
-            .get_int("UID_MINIMUM")
-            .expect("UID_MINIMUM not set?")
-            .saturating_sub(1))
-        .try_into()?;
+        let mut max_user_id: i32 =
+            (self.global_settings.uid_minimum.saturating_sub(1)).try_into()?;
         if let Some(cur_max_id) = users.select(diesel::dsl::max(id)).first(&self.conn)? {
             max_user_id = std::cmp::max(cur_max_id, max_user_id)
         }
@@ -84,22 +79,13 @@ impl<'a> DB<'a> {
         let mut next_user_id = max_user_id;
         let mut next_username: String;
 
-        let username_prefix = self
-            .global_settings
-            .get_string("GUEST_USERNAME_PREFIX")
-            .context("GUEST_USERNAME_PREFIX config var not set")?;
+        let username_prefix = &self.global_settings.guest_username_prefix;
 
         // check whether user id or name is already being used on system
         loop {
             next_user_id = next_user_id.checked_add(1).unwrap();
 
-            if next_user_id
-                > self
-                    .global_settings
-                    .get_int("UID_MAXIMUM")
-                    .expect("UID_MAXIMUM not set?")
-                    .try_into()?
-            {
+            if next_user_id > self.global_settings.uid_maximum.try_into()? {
                 bail!("No free user id found!");
             }
 
@@ -128,22 +114,15 @@ impl<'a> DB<'a> {
     fn find_next_unused_group_id_and_name(&self) -> Result<(i32, String), Error> {
         use schema::users::dsl::*;
 
-        let mut max_group_id: i32 = (self
-            .global_settings
-            .get_int("GID_MINIMUM")
-            .expect("GID_MINIMUM not set?")
-            - 1)
-        .try_into()?;
+        let mut max_group_id: i32 =
+            (self.global_settings.gid_minimum.saturating_sub(1)).try_into()?;
         if let Some(cur_max_id) = users.select(diesel::dsl::max(id)).first(&self.conn)? {
             max_group_id = std::cmp::max(cur_max_id, max_group_id)
         }
         let mut next_group_id = max_group_id;
         let mut next_group_name: String;
 
-        let group_name_prefix = self
-            .global_settings
-            .get_string("GUEST_GROUP_NAME_PREFIX")
-            .context("GUEST_GROUP_NAME_PREFIX config var not set")?;
+        let group_name_prefix = &self.global_settings.guest_group_name_prefix;
 
         // check whether group id or name is already being used on system
         loop {
@@ -165,13 +144,7 @@ impl<'a> DB<'a> {
             break;
         }
 
-        if next_group_id
-            > self
-                .global_settings
-                .get_int("GID_MAXIMUM")
-                .expect("GID_MAXIMUM not set?")
-                .try_into()?
-        {
+        if next_group_id > self.global_settings.gid_maximum.try_into()? {
             bail!("No free group id found!");
         }
         log::info!(
@@ -190,10 +163,7 @@ impl<'a> DB<'a> {
             group_name,
         };
 
-        let home_base_path = self
-            .global_settings
-            .get_string("HOME_BASE_PATH")
-            .context("HOME_BASE_PATH config var not set")?;
+        let home_base_path = &self.global_settings.home_base_path;
         let (user_id, username) = self.find_next_unused_user_id_and_name()?;
         let target_user = models::User {
             id: user_id,
