@@ -50,7 +50,11 @@ You can set the following configuration options:
 
 ## Development setup
 
-Before you can start developing, it is necessary to initialize the database.
+Before you can start developing, it is necessary to initialize the database. Therefore, it is required to install the diesel CLI:
+
+```bash
+cargo install diesel_cli --no-default-features --features "sqlite"
+```
 
 ### Database setup
 
