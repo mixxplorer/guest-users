@@ -50,6 +50,12 @@ You can set the following configuration options:
 
 ## Development setup
 
+For building the project, it is required to have some development dependencies. On Debian/Ubuntu you can install them via apt:
+
+```bash
+apt-get install libsqlite3-dev dpkg dpkg-dev liblzma-dev libclang-dev libpam-dev libnss3-dev
+```
+
 Before you can start developing, it is necessary to initialize the database. Therefore, it is required to install the diesel CLI:
 
 ```bash
