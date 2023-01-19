@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -e
+
+# Make sure the config directory gets created prior to for example the database gets created
+mkdir -p /etc/guest-users
+chown root:root /etc/guest-users
+chmod 755 /etc/guest-users

@@ -1,0 +1,8 @@
+[workspace]
+members = ["guest-users-lib", "pam", "nss"]
+
+[profile.release]
+# Add some settings for shrinking the binary size significantly for release builds
+# see https://github.com/johnthagen/min-sized-rust for more inspiration
+strip = true
+lto = true

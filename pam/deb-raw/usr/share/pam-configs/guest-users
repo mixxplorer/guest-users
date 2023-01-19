@@ -1,0 +1,9 @@
+Name: Guest users authentication
+Default: yes
+Priority: 257
+Auth-Type: Primary
+Auth:
+	[success=end default=ignore]	pam_guest_users.so
+Account-Type: Primary
+Account:
+	sufficient	pam_guest_users.so

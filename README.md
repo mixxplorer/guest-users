@@ -1,92 +1,81 @@
-# Guest Users
+# Guest Users Module for Linux
 
+This project offers a guest user support for Linux devices using the [PAM framework](https://github.com/linux-pam/linux-pam) as well as the [GNU nss framework](https://www.gnu.org/software/libc/manual/html_node/Name-Service-Switch.html).
 
-
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://rechenknecht.net/mixxplorer/guest-users.git
-git branch -M main
-git push -uf origin main
-```
-
-## Integrate with your tools
-
-- [ ] [Set up project integrations](https://rechenknecht.net/mixxplorer/guest-users/-/settings/integrations)
-
-## Collaborate with your team
-
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!).  Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+It offers a username (specified via `GUEST_USERNAME_NEW_USER`), which creates a new user on the fly for a guest account. Per guest login a new user account will be created in order to achieve separation of guest users.
 
 ## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+This project is currently tested with Ubuntu 22.04 (jammy) only.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+### From repo
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+Just add a new repository like
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+```bash
+echo "deb [trusted=yes]  https://mixxplorer.pages.rechenknecht.net/guest-users/packages/release/main /" > /etc/apt/sources.list.d/guest-users.list
+```
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+and then you can install the corresponding packages:
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+```bash
+apt-get update
+apt-get install guest-users
+```
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+### From dev
 
-## License
-For open source projects, say how it is licensed.
+You can get the latest Debian packages from the pipeline (`build-rs` step). You just have to install all packages.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Check out the building section for more information.
+
+## Configuration
+
+Once installed, you can configure the module by placing a [toml](https://toml.io) file to `/etc/guest-users/settings.toml`.
+
+You can set the following configuration options:
+
+| Option | Default value | Description |
+|:------:|:-------------:|:-----------:|
+| `guest_username_new_user` | `guest` | The username, which can be used to create a new guest user during login |
+| `guest_username_prefix` | `guest` | A prefix all guest usernames are prepended with |
+| `guest_group_name_prefix` | `guest` | A prefix all guest group names are prepended with |
+| `home_base_path` | `/tmp/guest-users-home` | Base path for guest home directories |
+| `guest_shell` | `/bin/bash` | Shell, which will be used for all guest users |
+| `public_database_path` | `/etc/guest-users/public.db` | Database path for guest users (sqlite) |
+| `uid_minimum` | `31000` | Minimum UID for guest users |
+| `uid_maximum` | `31999` | Maximum UID for guest users |
+| `gid_minimum` | `31000` | Minimum GID for individual default groups of guest users |
+| `gid_maximum` | `31999` | Maximum GID for individual default groups guest users |
+
+## Development setup
+
+For building the project, it is required to have some development dependencies. On Debian/Ubuntu you can install them via apt:
+
+```bash
+apt-get install libsqlite3-dev dpkg dpkg-dev liblzma-dev libclang-dev libpam-dev libnss3-dev
+```
+
+Before you can start developing, it is necessary to initialize the database. Therefore, it is required to install the diesel CLI:
+
+```bash
+cargo install diesel_cli --no-default-features --features "sqlite"
+```
+
+### Database setup
+
+To initialize the database, just run
+
+```bash
+diesel migration run --database-url=guest_users.db --config-file guest-users-lib/diesel.toml --migration-dir guest-users-lib/migrations
+```
+
+### Building
+
+This project makes use of the cargo package manager. To build, just execute `cargo build` at the top level directory.
+
+To build all the Debian packages, you can make use of this one-liner:
+
+```bash
+cargo deb -p guest-users-pam && cargo deb -p guest-users-nss && cargo deb -p guest-users-lib
+```

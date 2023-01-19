@@ -1,0 +1,39 @@
+[package]
+name = "guest-users-pam"
+version = "0.0.0-dev"
+authors = ["Leonard Marschke <leo@mixxplorer.de>"]
+edition = "2018"
+description = "Guest users support, PAM module"
+license = "MIT"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "guest_users_pam"
+crate-type = ["cdylib"]
+
+[package.metadata.deb]
+maintainer = "Leonard Marschke <leo@mixxplorer.de>"
+copyright = "2023, Leonard Marschke <leo@mixxplorer.de>"
+license-file = ["../LICENSE", "2"]
+extended-description = """Guest user support, PAM module\
+Bringing guest users onto your machine.
+
+With this module, you can make use of a specific guest users db and create new guest users during login."""
+depends = "guest-users"
+maintainer-scripts = "deb-maintainer-scripts"
+suggests = "guest-users-nss"
+section = "utility"
+priority = "optional"
+assets = [
+    ["target/release/libguest_users_pam.so", "lib/security/pam_guest_users.so", "755"],
+    ["deb-raw/usr/share/pam-configs/guest-users", "usr/share/pam-configs/guest-users", "644"],
+]
+
+[dependencies]
+guest-users-lib = { path="../guest-users-lib" }
+anyhow = "1.0.44"
+log = "^0.4.5"
+pam = { git = "https://github.com/lmm-git/pam.git", branch = "fix/pam-module", features = ["module"] }
+config = "0.13.1"
+simple_logger = "1.13.0"
