@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use anyhow::Context;
 use anyhow::Result;
 
 const CONFIG_FILE_PATH: &str = "/etc/guest-users/settings.toml";
@@ -75,4 +76,10 @@ pub fn init_logger() {
         .env()
         .init()
         .ok();
+}
+
+pub fn get_current_os_boot_id() -> Result<String> {
+    let random_boot_id = std::fs::read_to_string("/proc/sys/kernel/random/boot_id")
+        .context("Unable to read the current boot id from /proc/sys/kernel/random/boot_id")?;
+    Ok(random_boot_id.trim_end_matches(&['\n']).to_string())
 }

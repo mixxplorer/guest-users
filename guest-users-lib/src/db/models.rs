@@ -13,6 +13,7 @@ pub struct User {
     pub user_name: String,
     pub user_group_id: i32,
     pub home_path: String,
+    pub boot_id: String,
 }
 
 #[derive(Identifiable, Insertable, AsChangeset, Queryable, Debug, Clone)]
