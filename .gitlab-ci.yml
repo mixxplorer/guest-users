@@ -19,11 +19,13 @@ prepare-rs:
      - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" pam/Cargo.toml
      - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" nss/Cargo.toml
      - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" guest-users-lib/Cargo.toml
+     - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" sync-accountsservice/Cargo.toml
   artifacts:
     paths:
-      - pam/Cargo.toml
-      - nss/Cargo.toml
       - guest-users-lib/Cargo.toml
+      - nss/Cargo.toml
+      - pam/Cargo.toml
+      - sync-accountsservice/Cargo.toml
     expire_in: 1 week
     when: always
 
@@ -55,6 +57,7 @@ build-rs:
     - cargo deb -p guest-users-pam
     - cargo deb -p guest-users-nss
     - cargo deb -p guest-users-lib
+    - cargo deb -p guest-users-sync-accountsservice
   artifacts:
     paths:
       - target/debian

@@ -1,6 +1,6 @@
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 
-use anyhow::Error;
+use anyhow::{Context, Error};
 use libnss::interop::Response;
 use libnss::passwd::Passwd;
 
@@ -21,6 +21,39 @@ fn db_to_passwd(
     Ok(new_passwd_user)
 }
 
+fn get_ghost_user(
+    global_settings: guest_users_lib::helper::Config,
+) -> Result<Option<Passwd>, Error> {
+    if !global_settings.enable_ghost_user {
+        return Ok(None);
+    }
+
+    // Set human readable username
+    let gecos = crate::gecos::Gecos {
+        full_name: Some(global_settings.ghost_user_gecos_username),
+        room_number: None,
+        work_phone: None,
+        home_phone: None,
+        other: None,
+    };
+
+    Ok(Some(Passwd {
+        name: global_settings.guest_username_new_user,
+        passwd: "x".to_string(), // no password set
+        uid: global_settings
+            .ghost_user_uid
+            .try_into()
+            .context("Unable to parse ghost user uid as u32")?,
+        gid: global_settings
+            .ghost_user_gid
+            .try_into()
+            .context("Unable to parse ghost user gid as u32")?,
+        gecos: gecos.to_gecos_string(),
+        dir: "/dev/null".to_string(),
+        shell: "/bin/false".to_string(),
+    }))
+}
+
 pub fn get_all_entries() -> Result<Response<Vec<Passwd>>, Error> {
     let global_settings = guest_users_lib::helper::get_config()?;
     let db = guest_users_lib::db::DB::new(&global_settings)?;
@@ -30,6 +63,10 @@ pub fn get_all_entries() -> Result<Response<Vec<Passwd>>, Error> {
     let mut passwd_users = Vec::new();
     for user in users.iter() {
         passwd_users.push(db_to_passwd(&global_settings, user)?);
+    }
+
+    if let Some(ghost_user) = get_ghost_user(global_settings)? {
+        passwd_users.push(ghost_user);
     }
 
     Ok(Response::Success(passwd_users))
@@ -43,6 +80,12 @@ pub fn get_entry_by_uid(uid: libc::uid_t) -> Result<Response<Passwd>, Error> {
         return Ok(Response::Success(db_to_passwd(&global_settings, &user)?));
     }
 
+    if let Some(ghost_user) = get_ghost_user(global_settings)? {
+        if ghost_user.uid == uid {
+            return Ok(Response::Success(ghost_user));
+        }
+    }
+
     Ok(Response::NotFound)
 }
 
@@ -52,6 +95,12 @@ pub fn get_entry_by_name(name: &str) -> Result<Response<Passwd>, Error> {
 
     if let Some(user) = db.find_user_by_name(name)? {
         return Ok(Response::Success(db_to_passwd(&global_settings, &user)?));
+    }
+
+    if let Some(ghost_user) = get_ghost_user(global_settings)? {
+        if ghost_user.name == name {
+            return Ok(Response::Success(ghost_user));
+        }
     }
 
     Ok(Response::NotFound)

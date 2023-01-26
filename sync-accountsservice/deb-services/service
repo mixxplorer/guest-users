@@ -1,0 +1,15 @@
+[Unit]
+Description=Guest Users Startup Sync
+Before=gdm.service
+After=dbus.service
+
+[Service]
+ExecStart=/usr/bin/guest-users-sync-accountsservice
+Type=oneshot
+Restart=on-failure
+RestartSec=10
+StartLimitInterval=1m
+StartLimitBurst=5
+
+[Install]
+WantedBy=multi-user.target

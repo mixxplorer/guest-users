@@ -43,10 +43,16 @@ You can set the following configuration options:
 | `home_base_path` | `/tmp/guest-users-home` | Base path for guest home directories |
 | `guest_shell` | `/bin/bash` | Shell, which will be used for all guest users |
 | `public_database_path` | `/etc/guest-users/public.db` | Database path for guest users (sqlite) |
-| `uid_minimum` | `31000` | Minimum UID for guest users |
+| `uid_minimum` | `31001` | Minimum UID for guest users |
 | `uid_maximum` | `31999` | Maximum UID for guest users |
-| `gid_minimum` | `31000` | Minimum GID for individual default groups of guest users |
+| `gid_minimum` | `31001` | Minimum GID for individual default groups of guest users |
 | `gid_maximum` | `31999` | Maximum GID for individual default groups guest users |
+| `enable_ghost_user` | `true` | Whether to enable a ghost user which will be shown e.g. on login screens |
+| `ghost_user_gecos_username` | `Guest` | The name the user will be shown on login screen |
+| `ghost_user_uid` | `31000` | UID for ghost user |
+| `ghost_user_gid` | `31000` | GID for ghost user |
+
+When you change ghost user related settings, it is necessary to either reboot the machine or alternatively run `guest-users-sync-accountsservice` manually.
 
 ## Development setup
 
@@ -77,5 +83,5 @@ This project makes use of the cargo package manager. To build, just execute `car
 To build all the Debian packages, you can make use of this one-liner:
 
 ```bash
-cargo deb -p guest-users-pam && cargo deb -p guest-users-nss && cargo deb -p guest-users-lib
+cargo deb -p guest-users-pam && cargo deb -p guest-users-nss && cargo deb -p guest-users-lib && cargo deb -p guest-users-sync-accountsservice
 ```
