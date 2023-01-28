@@ -8,12 +8,23 @@ fn db_to_passwd(
     global_settings: &guest_users_lib::helper::Config,
     user: &guest_users_lib::db::models::User,
 ) -> Result<Passwd, Error> {
+    let gecos = crate::gecos::Gecos {
+        full_name: Some(format!(
+            "{} ({})",
+            global_settings.guest_username_human_readable_prefix, user.id
+        )),
+        room_number: None,
+        work_phone: None,
+        home_phone: None,
+        other: None,
+    };
+
     let new_passwd_user = Passwd {
         name: user.user_name.clone(),
         passwd: "x".to_string(), // no password set
         uid: user.id as u32,
         gid: user.user_group_id as u32,
-        gecos: "".to_string(), // empty gecos as we don't have any infos about the user
+        gecos: gecos.to_gecos_string(),
         dir: user.home_path.clone(),
         shell: global_settings.guest_shell.clone(),
     };
