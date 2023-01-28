@@ -60,6 +60,7 @@ build-rs:
     - cargo deb -p guest-users-nss
     - cargo deb -p guest-users-lib
     - cargo deb -p guest-users-sync-accountsservice
+    - cargo deb -p guest-users-guest-warning
   artifacts:
     paths:
       - target/debian
