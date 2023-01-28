@@ -57,6 +57,8 @@ config_default!(
     uid_maximum, i64, 31999,
     gid_minimum, i64, 31001,
     gid_maximum, i64, 31999,
+    guest_user_warning_title, String, "You are using a guest account",
+    guest_user_warning_body, String, "All data will be deleted on logout. Make sure to store your data on a safe location apart from this device.",
     enable_ghost_user, bool, true,
     ghost_user_gecos_username, String, "Guest",
     ghost_user_uid, i64, 31000,
