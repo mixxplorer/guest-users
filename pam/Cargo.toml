@@ -37,3 +37,4 @@ log = "^0.4.5"
 pam = { git = "https://github.com/lmm-git/pam.git", branch = "fix/pam-module", features = ["module"] }
 config = "0.13.1"
 simple_logger = "1.13.0"
+nix = "0.26.2"
