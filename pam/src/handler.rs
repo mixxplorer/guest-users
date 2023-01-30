@@ -50,7 +50,7 @@ pub fn authenticate(
 
     // check whether the login is matching the new guest user username, so we have to create a new user
     if guest_username_new_user == login_username {
-        log::debug!("Username {} matches!", login_username);
+        log::debug!("Username '{}' matches!", login_username);
 
         // Check whether the login is coming from a root user to prevent other (non-elevated) users to log-in as guest users
         // E.g. only gdm should be allowed to create a new guest user
@@ -94,6 +94,14 @@ pub fn authenticate(
         if !Uid::current().is_root() && Uid::current().as_raw() != u32::try_from(user.id)? {
             log::debug!("Detected non-root user and current user is not authenticating user but has UID={}, aborting!", Uid::current().as_raw());
             return Ok(PamReturnCode::Auth_Err);
+        }
+
+        // prevent logging in users without any running sessions (in order to prevent anyone to log in as a previous guest user if no reboot has happened)
+        if !crate::helper::has_active_user_sessions(login_username)? {
+            log::warn!("User has no associated sessions, preventing login!");
+            return Ok(PamReturnCode::Auth_Err);
+        } else {
+            log::debug!("User has at least one associated session, allowing login");
         }
 
         Ok(PamReturnCode::Success)

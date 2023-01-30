@@ -1,6 +1,7 @@
 use pam::{export_pam_module, PamHandle, PamModule, PamReturnCode};
 
 mod handler;
+mod helper;
 
 pub struct GuestUserPAMModule;
 impl PamModule for GuestUserPAMModule {
@@ -49,7 +50,7 @@ impl PamModule for GuestUserPAMModule {
         _args: Vec<&std::ffi::CStr>,
         _flags: std::os::raw::c_uint,
     ) -> PamReturnCode {
-        log::debug!("Change auth token");
+        log::trace!("Change auth token");
         PamReturnCode::Ignore
     }
 
@@ -58,7 +59,7 @@ impl PamModule for GuestUserPAMModule {
         _args: Vec<&std::ffi::CStr>,
         _flags: std::os::raw::c_uint,
     ) -> PamReturnCode {
-        log::debug!("Close session");
+        log::trace!("Close session");
         PamReturnCode::Ignore
     }
 
@@ -67,7 +68,7 @@ impl PamModule for GuestUserPAMModule {
         _args: Vec<&std::ffi::CStr>,
         _flags: std::os::raw::c_uint,
     ) -> PamReturnCode {
-        log::debug!("Open session");
+        log::trace!("Open session");
         PamReturnCode::Ignore
     }
 
@@ -76,7 +77,7 @@ impl PamModule for GuestUserPAMModule {
         _args: Vec<&std::ffi::CStr>,
         _flags: std::os::raw::c_uint,
     ) -> PamReturnCode {
-        log::debug!("Set credentials");
+        log::trace!("Set credentials");
         PamReturnCode::Ignore
     }
 }

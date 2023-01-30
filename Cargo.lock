@@ -699,6 +699,7 @@ dependencies = [
  "nix 0.26.2",
  "pam",
  "simple_logger",
+ "utmp-rs",
 ]
 
 [[package]]
@@ -1699,6 +1700,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "utmp-raw"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d9259b18bad8808ca2b0e585d8c06a6ac7b0bb11b7bf50632d05832c25e6f91f"
+dependencies = [
+ "cfg-if",
+ "libc",
+ "zerocopy",
+]
+
+[[package]]
+name = "utmp-rs"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8a9c97e4baf720e8a40615bd084c7e18f489d8099045f4e45f8e96d6c88c9c20"
+dependencies = [
+ "libc",
+ "thiserror",
+ "time 0.3.11",
+ "utmp-raw",
+ "zerocopy",
+]
+
+[[package]]
 name = "vcpkg"
 version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1856,6 +1881,27 @@ dependencies = [
  "serde",
  "static_assertions",
  "zvariant",
+]
+
+[[package]]
+name = "zerocopy"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "332f188cc1bcf1fe1064b8c58d150f497e697f49774aa846f2dc949d9a25f236"
+dependencies = [
+ "byteorder",
+ "zerocopy-derive",
+]
+
+[[package]]
+name = "zerocopy-derive"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6505e6815af7de1746a08f69c69606bb45695a17149517680f3b2149713b19a3"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
