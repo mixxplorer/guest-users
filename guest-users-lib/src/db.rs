@@ -196,6 +196,15 @@ impl<'a> DB<'a> {
             PermissionsExt::from_mode(0o700),
         )?;
 
+        // copy default home directory
+        crate::helper::copy_dir_recursive_and_set_owner(
+            &self.global_settings.home_skel,
+            &target_user.home_path,
+            Uid::from_raw(target_user.id as u32),
+            Gid::from_raw(target_user.user_group_id as u32),
+        )
+        .context("Unable to copy skeleton home directory to new guest users home directory!")?;
+
         diesel::insert_into(schema::groups::dsl::groups)
             .values(&target_group)
             .execute(&self.conn)?;

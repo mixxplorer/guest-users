@@ -1,3 +1,4 @@
+use std::fs;
 use std::path::Path;
 
 use anyhow::Context;
@@ -52,6 +53,7 @@ config_default!(
     guest_username_human_readable_prefix, String, "Guest",
     guest_group_name_prefix, String, "guest",
     home_base_path, String, "/tmp/guest-users-home",
+    home_skel, String, "/etc/skel",
     guest_shell, String, "/bin/bash",
     public_database_path, String, "/etc/guest-users/public.db",
     uid_minimum, i64, 31001,
@@ -92,4 +94,41 @@ pub fn get_current_os_boot_id() -> Result<String> {
     let random_boot_id = std::fs::read_to_string("/proc/sys/kernel/random/boot_id")
         .context("Unable to read the current boot id from /proc/sys/kernel/random/boot_id")?;
     Ok(random_boot_id.trim_end_matches(&['\n']).to_string())
+}
+
+pub fn copy_dir_recursive_and_set_owner(
+    gsrc: impl Into<std::path::PathBuf>,
+    gdst: impl Into<std::path::PathBuf>,
+    uid: nix::unistd::Uid,
+    gid: nix::unistd::Gid,
+) -> Result<()> {
+    let mut dir_queue: std::collections::LinkedList<(std::path::PathBuf, std::path::PathBuf)> =
+        std::collections::LinkedList::new();
+    dir_queue.push_back((gsrc.into(), gdst.into()));
+
+    while let Some((src, dst)) = dir_queue.pop_front() {
+        if !dst.is_dir() {
+            fs::create_dir(&dst).with_context(|| format!("Unable to create directory {dst:?}"))?;
+        }
+        nix::unistd::chown(&dst, Some(uid), Some(gid))
+            .with_context(|| format!("Unable to chown {dst:?}"))?;
+        fs::set_permissions(&dst, fs::metadata(&src)?.permissions())
+            .with_context(|| format!("Unable to set permissions for path {dst:?}!"))?;
+
+        for entry_res in
+            fs::read_dir(&src).with_context(|| format!("Unable to read_dir {src:?}"))?
+        {
+            let entry = entry_res?;
+            if entry.file_type()?.is_dir() {
+                dir_queue.push_back((entry.path(), dst.join(entry.file_name())));
+            } else {
+                let target = dst.join(entry.file_name());
+                fs::copy(entry.path(), &target)?;
+                nix::unistd::chown(&target, Some(uid), Some(gid))
+                    .with_context(|| format!("Unable to chown {dst:?}"))?;
+            }
+        }
+    }
+
+    Ok(())
 }
