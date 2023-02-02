@@ -83,6 +83,7 @@ pub fn init_logger() {
     // Ignore error here as this could be called multiple times and then a SetLoggerError will be thrown
     simple_logger::SimpleLogger::new()
         .with_level(log::LevelFilter::Error)
+        .with_utc_timestamps()
         .env()
         .init()
         .ok();

@@ -1,9 +1,11 @@
 use std::{
+    convert::TryFrom,
     ffi::{c_void, CStr, CString},
     os::raw::c_char,
 };
 
 use anyhow::{Context, Error};
+use nix::unistd::Uid;
 use pam::{PamHandle, PamItemType, PamReturnCode};
 
 pub fn account_management(
@@ -40,6 +42,7 @@ pub fn authenticate(
 ) -> Result<PamReturnCode, Error> {
     let global_settings = guest_users_lib::helper::get_config()?;
     let guest_username_new_user = &global_settings.guest_username_new_user;
+
     log::debug!("PAM handle={:?}", handle);
     let login_username = pam::get_user(handle, Some("login"))?;
 
@@ -48,6 +51,14 @@ pub fn authenticate(
     // check whether the login is matching the new guest user username, so we have to create a new user
     if guest_username_new_user == login_username {
         log::debug!("Username {} matches!", login_username);
+
+        // Check whether the login is coming from a root user to prevent other (non-elevated) users to log-in as guest users
+        // E.g. only gdm should be allowed to create a new guest user
+        if !Uid::current().is_root() {
+            log::debug!("Detected non-root user, aborting!");
+            return Ok(PamReturnCode::Auth_Err);
+        }
+
         pam::putenv(handle, "IS_GUEST_USER=true")?;
 
         // create completely new user
@@ -77,6 +88,14 @@ pub fn authenticate(
         if user.boot_id != guest_users_lib::helper::get_current_os_boot_id()? {
             return Ok(PamReturnCode::Auth_Err);
         }
+
+        // Check whether the login is coming from a root user to prevent other (non-elevated) users to log-in as guest users
+        // E.g. only gdm and the user itself should be allowed to (re-)login as a guest user, but not other users
+        if !Uid::current().is_root() && Uid::current().as_raw() != u32::try_from(user.id)? {
+            log::debug!("Detected non-root user and current user is not authenticating user but has UID={}, aborting!", Uid::current().as_raw());
+            return Ok(PamReturnCode::Auth_Err);
+        }
+
         Ok(PamReturnCode::Success)
     } else {
         log::debug!("Username {} does not match.", login_username);
