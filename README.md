@@ -42,6 +42,7 @@ You can set the following configuration options:
 | `guest_username_human_readable_prefix` | `Guest` | A prefix all human readable guest usernames are prepended with |
 | `guest_group_name_prefix` | `guest` | A prefix all guest group names are prepended with |
 | `home_base_path` | `/tmp/guest-users-home` | Base path for guest home directories |
+| `home_skel` | `/etc/skel` | Skeleton home directory being copied to every new guest user |
 | `guest_shell` | `/bin/bash` | Shell, which will be used for all guest users |
 | `public_database_path` | `/etc/guest-users/public.db` | Database path for guest users (sqlite) |
 | `uid_minimum` | `31001` | Minimum UID for guest users |
