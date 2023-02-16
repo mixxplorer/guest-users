@@ -19,7 +19,7 @@ impl PamModule for GuestUserPAMModule {
                 result
             }
             Err(err) => {
-                log::warn!("account_management failure: {:?}", err);
+                log::warn!("account_management failure: {err:?}");
                 PamReturnCode::Service_Err
             }
         }
@@ -39,7 +39,7 @@ impl PamModule for GuestUserPAMModule {
                 result
             }
             Err(err) => {
-                log::warn!("authenticate failure: {:?}", err);
+                log::warn!("authenticate failure: {err:?}");
                 PamReturnCode::Service_Err
             }
         }

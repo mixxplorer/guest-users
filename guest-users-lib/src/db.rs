@@ -37,7 +37,7 @@ impl<'a> DB<'a> {
         log::trace!("Creating new DB object");
         let database_url = &global_settings.public_database_path;
         let conn = diesel::SqliteConnection::establish(database_url)
-            .with_context(|| format!("Cannot connect to database {}", database_url))?;
+            .with_context(|| format!("Cannot connect to database {database_url}"))?;
         conn.execute("PRAGMA foreign_keys = ON")?;
         log::trace!("Enabled foreign key check on DB");
 
@@ -89,25 +89,21 @@ impl<'a> DB<'a> {
                 bail!("No free user id found!");
             }
 
-            next_username = format!("{}-{}", username_prefix, next_user_id);
+            next_username = format!("{username_prefix}-{next_user_id}");
 
             if User::from_uid(Uid::from_raw(next_user_id.try_into()?))?.is_some() {
-                log::debug!("User ID {} already being used on system", next_user_id);
+                log::debug!("User ID {next_user_id} already being used on system");
                 continue;
             }
             if User::from_name(&next_username)?.is_some() {
-                log::debug!("User name {} already being used on system", next_username);
+                log::debug!("User name {next_username} already being used on system");
                 continue;
             }
 
             break;
         }
 
-        log::info!(
-            "Next free user id is {} with name {}",
-            next_user_id,
-            next_username
-        );
+        log::info!("Next free user id is {next_user_id} with name {next_username}");
         Ok((next_user_id, next_username))
     }
 
@@ -127,17 +123,14 @@ impl<'a> DB<'a> {
         // check whether group id or name is already being used on system
         loop {
             next_group_id = next_group_id.checked_add(1).unwrap();
-            next_group_name = format!("{}-{}", group_name_prefix, next_group_id);
+            next_group_name = format!("{group_name_prefix}-{next_group_id}");
 
             if Group::from_gid(Gid::from_raw(next_group_id.try_into()?))?.is_some() {
-                log::debug!("Group ID {} already being used on system", next_group_id);
+                log::debug!("Group ID {next_group_id} already being used on system");
                 continue;
             }
             if Group::from_name(&next_group_name)?.is_some() {
-                log::debug!(
-                    "Group name {} already being used on system",
-                    next_group_name
-                );
+                log::debug!("Group name {next_group_name} already being used on system");
                 continue;
             }
 
@@ -147,11 +140,7 @@ impl<'a> DB<'a> {
         if next_group_id > self.global_settings.gid_maximum.try_into()? {
             bail!("No free group id found!");
         }
-        log::info!(
-            "Next free group id is {} with name {}",
-            next_group_id,
-            next_group_name
-        );
+        log::info!("Next free group id is {next_group_id} with name {next_group_name}");
         Ok((next_group_id, next_group_name))
     }
 
@@ -170,7 +159,7 @@ impl<'a> DB<'a> {
             id: user_id,
             user_group_id: group_id,
             user_name: username.clone(),
-            home_path: format!("{}/{}", home_base_path, username),
+            home_path: format!("{home_base_path}/{username}"),
             boot_id: current_boot_id,
         };
 

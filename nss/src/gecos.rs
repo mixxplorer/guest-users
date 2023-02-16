@@ -11,8 +11,7 @@ macro_rules! gecos_string_sanitize {
         if let Some(unpacked) = $sts.clone() {
             if unpacked.contains(",") {
                 log::warn!(
-                    "{} does contain a ',', which is not allowed in gecos strings, omitting it...",
-                    unpacked
+                    "{unpacked} does contain a ',', which is not allowed in gecos strings, omitting it..."
                 );
             }
             unpacked.replace(",", "")

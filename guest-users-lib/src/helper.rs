@@ -73,7 +73,7 @@ pub fn get_config() -> Result<Config> {
     if Path::new(&CONFIG_FILE_PATH).exists() {
         builder = builder.add_source(config::File::with_name(CONFIG_FILE_PATH));
     } else {
-        log::debug!("Config file {} does not exist", CONFIG_FILE_PATH)
+        log::debug!("Config file {CONFIG_FILE_PATH} does not exist")
     }
 
     Config::default(builder)

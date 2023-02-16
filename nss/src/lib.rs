@@ -24,7 +24,7 @@ impl PasswdHooks for GuestUsersPasswd {
         match passwd::get_all_entries() {
             Ok(result) => result,
             Err(err) => {
-                log::warn!("Could not get all entries (user): {:?}", err);
+                log::warn!("Could not get all entries (user): {err:?}");
                 Response::Unavail
             }
         }
@@ -39,7 +39,7 @@ impl PasswdHooks for GuestUsersPasswd {
                 result
             }
             Err(err) => {
-                log::warn!("Could not get entry by uid (user): {:?}", err);
+                log::warn!("Could not get entry by uid (user): {err:?}");
                 Response::Unavail
             }
         }
@@ -54,7 +54,7 @@ impl PasswdHooks for GuestUsersPasswd {
                 result
             }
             Err(err) => {
-                log::warn!("Could not get entry by user name (user): {:?}", err);
+                log::warn!("Could not get entry by user name (user): {err:?}");
                 Response::Unavail
             }
         }
@@ -71,7 +71,7 @@ impl ShadowHooks for GuestUsersShadow {
         match shadow::get_all_entries() {
             Ok(result) => result,
             Err(err) => {
-                log::warn!("Could not get all entries (shadow): {:?}", err);
+                log::warn!("Could not get all entries (shadow): {err:?}");
                 Response::Unavail
             }
         }
@@ -86,7 +86,7 @@ impl ShadowHooks for GuestUsersShadow {
                 result
             }
             Err(err) => {
-                log::warn!("Could not get entry by user name (shadow): {:?}", err);
+                log::warn!("Could not get entry by user name (shadow): {err:?}");
                 Response::Unavail
             }
         }
@@ -103,7 +103,7 @@ impl GroupHooks for GuestUserGroups {
         match group::get_all_entries() {
             Ok(result) => result,
             Err(err) => {
-                log::warn!("Could not get all entries (group): {:?}", err);
+                log::warn!("Could not get all entries (group): {err:?}");
                 Response::Unavail
             }
         }
@@ -118,7 +118,7 @@ impl GroupHooks for GuestUserGroups {
                 result
             }
             Err(err) => {
-                log::warn!("Could not get entry by gid: {:?}", err);
+                log::warn!("Could not get entry by gid: {err:?}");
                 Response::Unavail
             }
         }
@@ -133,7 +133,7 @@ impl GroupHooks for GuestUserGroups {
                 result
             }
             Err(err) => {
-                log::warn!("Could not get entry by group name: {:?}", err);
+                log::warn!("Could not get entry by group name: {err:?}");
                 Response::Unavail
             }
         }

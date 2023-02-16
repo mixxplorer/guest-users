@@ -14,7 +14,7 @@ pub fn account_management(
     _flags: std::os::raw::c_uint,
 ) -> Result<PamReturnCode, Error> {
     let login_user = pam::get_user(handle, Some("login"))?;
-    log::trace!("login_user={}", login_user);
+    log::trace!("login_user={login_user}");
 
     let global_settings = guest_users_lib::helper::get_config()?;
     let db = guest_users_lib::db::DB::new(&global_settings)?;
@@ -43,14 +43,14 @@ pub fn authenticate(
     let global_settings = guest_users_lib::helper::get_config()?;
     let guest_username_new_user = &global_settings.guest_username_new_user;
 
-    log::debug!("PAM handle={:?}", handle);
+    log::debug!("PAM handle={handle:?}");
     let login_username = pam::get_user(handle, Some("login"))?;
 
     let db = guest_users_lib::db::DB::new(&global_settings)?;
 
     // check whether the login is matching the new guest user username, so we have to create a new user
     if guest_username_new_user == login_username {
-        log::debug!("Username '{}' matches!", login_username);
+        log::debug!("Username '{login_username}' matches!");
 
         // Check whether the login is coming from a root user to prevent other (non-elevated) users to log-in as guest users
         // E.g. only gdm should be allowed to create a new guest user
@@ -75,8 +75,7 @@ pub fn authenticate(
         // make sure setting the new user worked
         if new_user_name.to_str()? != user_name_set {
             log::error!(
-                "Set user name does not match: user_name_set={}, new_user_name={}",
-                user_name_set,
+                "Set user name does not match: user_name_set={user_name_set}, new_user_name={}",
                 new_user_name.into_string()?
             );
             return Ok(PamReturnCode::Service_Err);
@@ -106,7 +105,7 @@ pub fn authenticate(
 
         Ok(PamReturnCode::Success)
     } else {
-        log::debug!("Username {} does not match.", login_username);
+        log::debug!("Username {login_username} does not match.");
         Ok(PamReturnCode::Ignore)
     }
 }
