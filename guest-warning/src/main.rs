@@ -61,7 +61,7 @@ async fn notify_if_guest_user() -> Result<(), Box<dyn Error>> {
             0,
         )
         .await?;
-    log::debug!("Got notification ID={}", reply);
+    log::debug!("Got notification ID={reply}");
 
     Ok(())
 }

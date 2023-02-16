@@ -32,7 +32,7 @@ async fn update_ghost_user() -> Result<(), Box<dyn Error>> {
         let reply = proxy
             .cache_user(&global_settings.guest_username_new_user)
             .await?;
-        log::debug!("Cache user reply: {:?}", reply);
+        log::debug!("Cache user reply: {reply:?}");
     } else if proxy
         .find_user_by_name(&global_settings.guest_username_new_user)
         .await
