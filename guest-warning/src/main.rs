@@ -37,7 +37,7 @@ async fn notify_if_guest_user() -> Result<(), Box<dyn Error>> {
 
     let cur_user_id = nix::unistd::Uid::current();
     // check whether this user id belongs to a guest user
-    let db = guest_users_lib::db::DB::new(&global_settings)?;
+    let mut db = guest_users_lib::db::DB::new(&global_settings)?;
     if db
         .find_user_by_id(cur_user_id.as_raw().try_into()?)?
         .is_none()

@@ -5,7 +5,7 @@ use libnss::group::Group;
 use libnss::interop::Response;
 
 fn db_to_group(
-    db: &guest_users_lib::db::DB,
+    db: &mut guest_users_lib::db::DB,
     group: &guest_users_lib::db::models::Group,
 ) -> Result<Group, Error> {
     let users_in_group = db.find_users_for_group(group)?;
@@ -25,13 +25,13 @@ fn db_to_group(
 
 pub fn get_all_entries() -> Result<Response<Vec<Group>>, Error> {
     let global_settings = guest_users_lib::helper::get_config()?;
-    let db = guest_users_lib::db::DB::new(&global_settings)?;
+    let mut db = guest_users_lib::db::DB::new(&global_settings)?;
 
     let users = db.get_groups()?;
 
     let mut passwd_users = Vec::new();
     for user in users.iter() {
-        passwd_users.push(db_to_group(&db, user)?);
+        passwd_users.push(db_to_group(&mut db, user)?);
     }
 
     Ok(Response::Success(passwd_users))
@@ -39,10 +39,10 @@ pub fn get_all_entries() -> Result<Response<Vec<Group>>, Error> {
 
 pub fn get_entry_by_gid(gid: libc::uid_t) -> Result<Response<Group>, Error> {
     let global_settings = guest_users_lib::helper::get_config()?;
-    let db = guest_users_lib::db::DB::new(&global_settings)?;
+    let mut db = guest_users_lib::db::DB::new(&global_settings)?;
 
     if let Some(user) = db.find_group_by_id(i32::try_from(gid)?)? {
-        return Ok(Response::Success(db_to_group(&db, &user)?));
+        return Ok(Response::Success(db_to_group(&mut db, &user)?));
     }
 
     Ok(Response::NotFound)
@@ -50,10 +50,10 @@ pub fn get_entry_by_gid(gid: libc::uid_t) -> Result<Response<Group>, Error> {
 
 pub fn get_entry_by_name(name: &str) -> Result<Response<Group>, Error> {
     let global_settings = guest_users_lib::helper::get_config()?;
-    let db = guest_users_lib::db::DB::new(&global_settings)?;
+    let mut db = guest_users_lib::db::DB::new(&global_settings)?;
 
     if let Some(user) = db.find_group_by_name(name)? {
-        return Ok(Response::Success(db_to_group(&db, &user)?));
+        return Ok(Response::Success(db_to_group(&mut db, &user)?));
     }
 
     Ok(Response::NotFound)

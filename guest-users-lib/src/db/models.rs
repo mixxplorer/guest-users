@@ -7,7 +7,7 @@ use crate::db::schema::user_group_memberships;
 use crate::db::schema::users;
 
 #[derive(Identifiable, Insertable, AsChangeset, Queryable, Debug, Clone)]
-#[table_name = "users"]
+#[diesel(table_name = users)]
 pub struct User {
     pub id: i32,
     pub user_name: String,
@@ -17,16 +17,16 @@ pub struct User {
 }
 
 #[derive(Identifiable, Insertable, AsChangeset, Queryable, Debug, Clone)]
-#[table_name = "groups"]
+#[diesel(table_name = groups)]
 pub struct Group {
     pub id: i32,
     pub group_name: String,
 }
 
 #[derive(Identifiable, Insertable, AsChangeset, Associations, Queryable, Debug, Clone)]
-#[belongs_to(User, foreign_key = "user_id")]
-#[belongs_to(Group, foreign_key = "group_id")]
-#[table_name = "user_group_memberships"]
+#[diesel(belongs_to(User, foreign_key = user_id))]
+#[diesel(belongs_to(Group, foreign_key = group_id))]
+#[diesel(table_name = user_group_memberships)]
 pub struct UserGroupMembership {
     pub id: i32,
     pub user_id: i32,
