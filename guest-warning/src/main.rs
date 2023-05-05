@@ -8,13 +8,16 @@ use clap::Parser;
 use futures::executor::block_on;
 
 #[derive(Parser, Debug)]
-#[clap(author, version, about, long_about = None)]
+#[command(author, version, about, long_about = None)]
 struct Args {
     #[clap(flatten)]
     log_level: clap_verbosity_flag::Verbosity,
 }
 
-#[zbus::dbus_proxy]
+#[zbus::dbus_proxy(
+    default_service = "org.freedesktop.Notifications",
+    default_path = "/org/freedesktop/Notifications"
+)]
 trait Notifications {
     fn notify(
         &self,

@@ -13,7 +13,7 @@ This project is currently tested with Ubuntu 22.04 (jammy) only.
 Just add a new repository like
 
 ```bash
-echo "deb [trusted=yes]  https://mixxplorer.pages.rechenknecht.net/guest-users/packages/release/main /" > /etc/apt/sources.list.d/guest-users.list
+echo "deb [trusted=yes] https://mixxplorer.pages.rechenknecht.net/guest-users/packages/release/main /" > /etc/apt/sources.list.d/guest-users.list
 ```
 
 and then you can install the corresponding packages:
