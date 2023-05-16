@@ -191,6 +191,7 @@ impl<'a> DB<'a> {
             &target_user.home_path,
             Uid::from_raw(target_user.id as u32),
             Gid::from_raw(target_user.user_group_id as u32),
+            false,
         )
         .context("Unable to copy skeleton home directory to new guest users home directory!")?;
 
