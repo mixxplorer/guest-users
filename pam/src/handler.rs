@@ -17,7 +17,7 @@ pub fn account_management(
     log::trace!("login_user={login_user}");
 
     let global_settings = guest_users_lib::helper::get_config()?;
-    let db = guest_users_lib::db::DB::new(&global_settings)?;
+    let mut db = guest_users_lib::db::DB::new(&global_settings)?;
 
     if db.find_user_by_name(login_user)?.is_some() {
         return Ok(PamReturnCode::Success);
@@ -46,7 +46,7 @@ pub fn authenticate(
     log::debug!("PAM handle={handle:?}");
     let login_username = pam::get_user(handle, Some("login"))?;
 
-    let db = guest_users_lib::db::DB::new(&global_settings)?;
+    let mut db = guest_users_lib::db::DB::new(&global_settings)?;
 
     // check whether the login is matching the new guest user username, so we have to create a new user
     if guest_username_new_user == login_username {

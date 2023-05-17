@@ -8,13 +8,16 @@ use clap::Parser;
 use futures::executor::block_on;
 
 #[derive(Parser, Debug)]
-#[clap(author, version, about, long_about = None)]
+#[command(author, version, about, long_about = None)]
 struct Args {
     #[clap(flatten)]
     log_level: clap_verbosity_flag::Verbosity,
 }
 
-#[zbus::dbus_proxy]
+#[zbus::dbus_proxy(
+    default_service = "org.freedesktop.Notifications",
+    default_path = "/org/freedesktop/Notifications"
+)]
 trait Notifications {
     fn notify(
         &self,
@@ -34,7 +37,7 @@ async fn notify_if_guest_user() -> Result<(), Box<dyn Error>> {
 
     let cur_user_id = nix::unistd::Uid::current();
     // check whether this user id belongs to a guest user
-    let db = guest_users_lib::db::DB::new(&global_settings)?;
+    let mut db = guest_users_lib::db::DB::new(&global_settings)?;
     if db
         .find_user_by_id(cur_user_id.as_raw().try_into()?)?
         .is_none()

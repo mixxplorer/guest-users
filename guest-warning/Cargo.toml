@@ -26,11 +26,11 @@ assets = [
 
 [dependencies]
 guest-users-lib = { path="../guest-users-lib" }
-anyhow = "1.0.44"
-log = "^0.4.5"
-simple_logger = "1.13.0"
-clap = { version = "3.2.11", features = ["derive"] }
-clap-verbosity-flag = "1.0.1"
-zbus = "2.3.2"
-futures = "0.3.21"
-nix = "0.24.1"
+anyhow = "~1.0.71"
+log = "~0.4.17"
+simple_logger = "~4.1.0"
+clap = { version = "~4.2.7", features = ["derive"] }
+clap-verbosity-flag = "~2.0.1"
+zbus = "~3.13.1"
+futures = "~0.3.28"
+nix = "~0.26.2"

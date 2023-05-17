@@ -10,6 +10,8 @@ use crate::diesel::OptionalExtension;
 use crate::diesel::QueryDsl;
 use crate::diesel::RunQueryDsl;
 
+use diesel_migrations::MigrationHarness;
+
 use std::convert::TryInto;
 use std::fs::set_permissions;
 use std::os::unix::prelude::PermissionsExt;
@@ -36,9 +38,9 @@ impl<'a> DB<'a> {
     pub fn new(global_settings: &'a Config) -> Result<Self, Error> {
         log::trace!("Creating new DB object");
         let database_url = &global_settings.public_database_path;
-        let conn = diesel::SqliteConnection::establish(database_url)
+        let mut conn = diesel::SqliteConnection::establish(database_url)
             .with_context(|| format!("Cannot connect to database {database_url}"))?;
-        conn.execute("PRAGMA foreign_keys = ON")?;
+        diesel::sql_query("PRAGMA foreign_keys = ON").execute(&mut conn)?;
         log::trace!("Enabled foreign key check on DB");
 
         // we use geteuid as when a user authenticates from itself (e.g. sudo) we are running under the users name but effectively as root
@@ -54,8 +56,9 @@ impl<'a> DB<'a> {
 
         // run migrations
         {
-            embed_migrations!("./migrations");
-            embedded_migrations::run(&conn)?;
+            const MIGRATIONS: diesel_migrations::EmbeddedMigrations =
+                diesel_migrations::embed_migrations!("./migrations");
+            conn.run_pending_migrations(MIGRATIONS).unwrap();
         }
 
         Ok(Self {
@@ -64,13 +67,13 @@ impl<'a> DB<'a> {
         })
     }
 
-    fn find_next_unused_user_id_and_name(&self) -> Result<(i32, String), Error> {
+    fn find_next_unused_user_id_and_name(&mut self) -> Result<(i32, String), Error> {
         use schema::users::dsl::*;
 
         // find next unused ID
         let mut max_user_id: i32 =
             (self.global_settings.uid_minimum.saturating_sub(1)).try_into()?;
-        if let Some(cur_max_id) = users.select(diesel::dsl::max(id)).first(&self.conn)? {
+        if let Some(cur_max_id) = users.select(diesel::dsl::max(id)).first(&mut self.conn)? {
             max_user_id = std::cmp::max(cur_max_id, max_user_id)
         }
         if max_user_id < 1 {
@@ -107,12 +110,12 @@ impl<'a> DB<'a> {
         Ok((next_user_id, next_username))
     }
 
-    fn find_next_unused_group_id_and_name(&self) -> Result<(i32, String), Error> {
+    fn find_next_unused_group_id_and_name(&mut self) -> Result<(i32, String), Error> {
         use schema::users::dsl::*;
 
         let mut max_group_id: i32 =
             (self.global_settings.gid_minimum.saturating_sub(1)).try_into()?;
-        if let Some(cur_max_id) = users.select(diesel::dsl::max(id)).first(&self.conn)? {
+        if let Some(cur_max_id) = users.select(diesel::dsl::max(id)).first(&mut self.conn)? {
             max_group_id = std::cmp::max(cur_max_id, max_group_id)
         }
         let mut next_group_id = max_group_id;
@@ -144,7 +147,7 @@ impl<'a> DB<'a> {
         Ok((next_group_id, next_group_name))
     }
 
-    pub fn create_guest_user(&self) -> Result<models::User, Error> {
+    pub fn create_guest_user(&mut self) -> Result<models::User, Error> {
         let (group_id, group_name) = self.find_next_unused_group_id_and_name()?;
 
         let target_group = models::Group {
@@ -210,76 +213,76 @@ impl<'a> DB<'a> {
 
         diesel::insert_into(schema::groups::dsl::groups)
             .values(&target_group)
-            .execute(&self.conn)?;
+            .execute(&mut self.conn)?;
         diesel::insert_into(schema::users::dsl::users)
             .values(&target_user)
-            .execute(&self.conn)?;
+            .execute(&mut self.conn)?;
 
         Ok(target_user)
     }
 
-    pub fn get_users(&self) -> Result<Vec<models::User>, Error> {
+    pub fn get_users(&mut self) -> Result<Vec<models::User>, Error> {
         use schema::users::dsl::users;
 
-        Ok(users.load::<models::User>(&self.conn)?)
+        Ok(users.load::<models::User>(&mut self.conn)?)
     }
 
-    pub fn find_user_by_id(&self, uid: i32) -> Result<Option<models::User>, Error> {
+    pub fn find_user_by_id(&mut self, uid: i32) -> Result<Option<models::User>, Error> {
         use schema::users::dsl::{id, users};
 
         let result = users
             .filter(id.eq(uid))
-            .first::<models::User>(&self.conn)
+            .first::<models::User>(&mut self.conn)
             .optional()?;
 
         Ok(result)
     }
 
-    pub fn find_user_by_name(&self, name: &str) -> Result<Option<models::User>, Error> {
+    pub fn find_user_by_name(&mut self, name: &str) -> Result<Option<models::User>, Error> {
         use schema::users::dsl::{user_name, users};
 
         let result = users
             .filter(user_name.eq(name))
-            .first::<models::User>(&self.conn)
+            .first::<models::User>(&mut self.conn)
             .optional()?;
 
         Ok(result)
     }
 
-    pub fn get_groups(&self) -> Result<Vec<models::Group>, Error> {
+    pub fn get_groups(&mut self) -> Result<Vec<models::Group>, Error> {
         use schema::groups::dsl::groups;
 
-        Ok(groups.load::<models::Group>(&self.conn)?)
+        Ok(groups.load::<models::Group>(&mut self.conn)?)
     }
 
-    pub fn find_group_by_id(&self, gid: i32) -> Result<Option<models::Group>, Error> {
+    pub fn find_group_by_id(&mut self, gid: i32) -> Result<Option<models::Group>, Error> {
         use schema::groups::dsl::{groups, id};
 
         let result = groups
             .filter(id.eq(gid))
-            .first::<models::Group>(&self.conn)
+            .first::<models::Group>(&mut self.conn)
             .optional()?;
 
         Ok(result)
     }
 
-    pub fn find_group_by_name(&self, name: &str) -> Result<Option<models::Group>, Error> {
+    pub fn find_group_by_name(&mut self, name: &str) -> Result<Option<models::Group>, Error> {
         use schema::groups::dsl::{group_name, groups};
 
         let result = groups
             .filter(group_name.eq(name))
-            .first::<models::Group>(&self.conn)
+            .first::<models::Group>(&mut self.conn)
             .optional()?;
 
         Ok(result)
     }
 
     pub fn find_users_for_group(
-        &self,
+        &mut self,
         match_group: &models::Group,
     ) -> Result<Vec<(models::UserGroupMembership, models::User)>, Error> {
         Ok(models::UserGroupMembership::belonging_to(match_group)
             .inner_join(schema::users::dsl::users)
-            .load::<(models::UserGroupMembership, models::User)>(&self.conn)?)
+            .load::<(models::UserGroupMembership, models::User)>(&mut self.conn)?)
     }
 }

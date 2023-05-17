@@ -7,13 +7,16 @@ use clap::Parser;
 use futures::executor::block_on;
 
 #[derive(Parser, Debug)]
-#[clap(author, version, about, long_about = None)]
+#[command(author, version, about, long_about = None)]
 struct Args {
     #[clap(flatten)]
     log_level: clap_verbosity_flag::Verbosity,
 }
 
-#[zbus::dbus_proxy]
+#[zbus::dbus_proxy(
+    default_service = "org.freedesktop.Accounts",
+    default_path = "/org/freedesktop/Accounts"
+)]
 trait Accounts {
     fn cache_user(&self, username: &str) -> zbus::Result<zbus::zvariant::OwnedObjectPath>;
 
