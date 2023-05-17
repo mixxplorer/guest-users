@@ -97,31 +97,48 @@ pub fn get_current_os_boot_id() -> Result<String> {
     Ok(random_boot_id.trim_end_matches(&['\n']).to_string())
 }
 
+/// Copies a directory and all of its contents and sets to all files a new owner but preserves the access rights.
+/// Whether it preserves the access rights, sets the owner and creates the topmost directory if it does not exists
+/// can be configured via `touch_topmost_directory`
 pub fn copy_dir_recursive_and_set_owner(
     gsrc: impl Into<std::path::PathBuf>,
     gdst: impl Into<std::path::PathBuf>,
     uid: nix::unistd::Uid,
     gid: nix::unistd::Gid,
+    touch_topmost_directory: bool,
 ) -> Result<()> {
-    let mut dir_queue: std::collections::LinkedList<(std::path::PathBuf, std::path::PathBuf)> =
-        std::collections::LinkedList::new();
-    dir_queue.push_back((gsrc.into(), gdst.into()));
+    // list of tuple (source, destination, touch_directory)
+    let mut dir_queue: std::collections::LinkedList<(
+        std::path::PathBuf,
+        std::path::PathBuf,
+        bool,
+    )> = std::collections::LinkedList::new();
+    dir_queue.push_back((gsrc.into(), gdst.into(), touch_topmost_directory));
 
-    while let Some((src, dst)) = dir_queue.pop_front() {
+    while let Some((src, dst, touch_directory)) = dir_queue.pop_front() {
         if !dst.is_dir() {
-            fs::create_dir(&dst).with_context(|| format!("Unable to create directory {dst:?}"))?;
+            if touch_directory {
+                fs::create_dir(&dst)
+                    .with_context(|| format!("Unable to create directory {dst:?}"))?;
+            } else {
+                bail!(
+                    "Directory {dst:?} does not exist, but we are not allowed to create it either."
+                );
+            }
         }
-        nix::unistd::chown(&dst, Some(uid), Some(gid))
-            .with_context(|| format!("Unable to chown {dst:?}"))?;
-        fs::set_permissions(&dst, fs::metadata(&src)?.permissions())
-            .with_context(|| format!("Unable to set permissions for path {dst:?}!"))?;
+        if touch_directory {
+            nix::unistd::chown(&dst, Some(uid), Some(gid))
+                .with_context(|| format!("Unable to chown {dst:?}"))?;
+            fs::set_permissions(&dst, fs::metadata(&src)?.permissions())
+                .with_context(|| format!("Unable to set permissions for path {dst:?}!"))?;
+        }
 
         for entry_res in
             fs::read_dir(&src).with_context(|| format!("Unable to read_dir {src:?}"))?
         {
             let entry = entry_res?;
             if entry.file_type()?.is_dir() {
-                dir_queue.push_back((entry.path(), dst.join(entry.file_name())));
+                dir_queue.push_back((entry.path(), dst.join(entry.file_name()), true));
             } else {
                 let target = dst.join(entry.file_name());
                 fs::copy(entry.path(), &target)?;

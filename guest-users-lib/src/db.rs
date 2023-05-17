@@ -180,9 +180,10 @@ impl<'a> DB<'a> {
             Some(Uid::from_raw(target_user.id as u32)),
             Some(Gid::from_raw(target_user.user_group_id as u32)),
         )?;
+        let home_directory_permissions_mode = 0o700;
         set_permissions(
             Path::new(&target_user.home_path),
-            PermissionsExt::from_mode(0o700),
+            PermissionsExt::from_mode(home_directory_permissions_mode),
         )?;
 
         // copy default home directory
@@ -191,8 +192,21 @@ impl<'a> DB<'a> {
             &target_user.home_path,
             Uid::from_raw(target_user.id as u32),
             Gid::from_raw(target_user.user_group_id as u32),
+            false,
         )
         .context("Unable to copy skeleton home directory to new guest users home directory!")?;
+
+        if Path::new(&target_user.home_path)
+            .metadata()?
+            .permissions()
+            .mode()
+            & 0o777
+            != home_directory_permissions_mode
+        {
+            bail!(
+                "Setting home directory permissions failed! (probably got changed in the process)"
+            );
+        }
 
         diesel::insert_into(schema::groups::dsl::groups)
             .values(&target_group)
