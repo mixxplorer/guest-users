@@ -70,15 +70,13 @@ build-rs:
 
 pages:
   stage: publish
+  image: dr.rechenknecht.net/bauhelfer/container/main/aptly
   needs:
     - build-rs
   script:
     - apt-get update
-    - apt-get install -y dpkg-dev
-    - mkdir -p public/packages/release/main
-    - cd public/packages/release/main
-    - cp -av ../../../../target/debian/*.deb .
-    - dpkg-scanpackages -m . | gzip > Packages.gz
+    - mkdir -p public
+    - aptly-ci-new-repo guest-users --rdistribution stable --rcomponent main target/debian public/packages
   artifacts:
     paths:
       - public
