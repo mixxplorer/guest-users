@@ -82,9 +82,15 @@ diesel migration run --database-url=guest_users.db --config-file guest-users-lib
 
 ### Building
 
-This project makes use of the cargo package manager. To build, just execute `cargo build` at the top level directory.
+This project makes use of the cargo package manager. To build, just execute `cargo build` at the top level directory after initializing the database via `diesel migration run` (see above).
 
-To build all the Debian packages, you can make use of this one-liner:
+To build all the Debian packages, you have to install the `cargo-deb` tool:
+
+```bash
+cargo install cargo-deb
+```
+
+Then, you can make use of this one-liner to build all Debian packages:
 
 ```bash
 cargo deb -p guest-users-pam && cargo deb -p guest-users-nss && cargo deb -p guest-users-lib && cargo deb -p guest-users-sync-accountsservice && cargo deb -p guest-users-guest-warning
