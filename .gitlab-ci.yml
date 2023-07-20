@@ -21,6 +21,8 @@ prepare-rs:
      - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" guest-users-lib/Cargo.toml
      - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" sync-accountsservice/Cargo.toml
      - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" guest-warning/Cargo.toml
+     - cargo install diesel_cli --no-default-features --features "sqlite"
+     - diesel migration run --database-url=guest_users.db --config-file guest-users-lib/diesel.toml --migration-dir guest-users-lib/migrations
   artifacts:
     paths:
       - guest-users-lib/Cargo.toml
@@ -28,13 +30,14 @@ prepare-rs:
       - pam/Cargo.toml
       - sync-accountsservice/Cargo.toml
       - guest-warning/Cargo.toml
-    expire_in: 1 week
+      - guest-users-lib/src/db/schema.rs
+    expire_in: 1 year
     when: always
 
 lint-rs:
   stage: lint
   needs:
-    - build-rs:ubuntu-jammy
+    - prepare-rs
   script:
     - apt-get update
     - apt-get install -q -y libsqlite3-dev libclang-dev libpam-dev libnss3-dev
@@ -43,29 +46,92 @@ lint-rs:
     - rustup component add rustfmt
     - cargo fmt --all -- --check
 
-build-rs:ubuntu-jammy:
+
+build-rs:debian-bookworm-amd64:
   stage: build
   needs:
     - prepare-rs
   script:
-    # Allow getting schema.rs as artifact
-    - rm guest-users-lib/src/db/.gitignore
     - apt-get update
-    - apt-get install -q -y libsqlite3-dev dpkg dpkg-dev liblzma-dev libclang-dev libpam-dev libnss3-dev
+    - apt-get install -q -y libsqlite3-dev liblzma-dev libclang-dev libpam-dev libnss3-dev
     - cargo install cargo-deb
-    - cargo install diesel_cli --no-default-features --features "sqlite"
-    - diesel migration run --database-url=guest_users.db --config-file guest-users-lib/diesel.toml --migration-dir guest-users-lib/migrations
     - cargo deb -p guest-users-pam
     - cargo deb -p guest-users-nss
     - cargo deb -p guest-users-lib
     - cargo deb -p guest-users-sync-accountsservice
     - cargo deb -p guest-users-guest-warning
-    - mkdir -p packages/ubuntu-jammy/main
-    - cp target/debian/*.deb packages/ubuntu-jammy/main
+    - mkdir -p packages/debian-bookworm/stable
+    - cp target/debian/*.deb packages/debian-bookworm/stable
   artifacts:
     paths:
-      - packages/ubuntu-jammy/main
-      - guest-users-lib/src/db/schema.rs
+      - packages/debian-bookworm/stable
+    expire_in: 1 week
+    when: always
+
+build-rs:debian-bookworm-arm64:
+  stage: build
+  image: dr.rechenknecht.net/bauhelfer/container/main/rust:debian-bookworm-amd64-x-arm64
+  needs:
+    - prepare-rs
+  script:
+    - apt-get update
+    - apt-get install -q -y libsqlite3-dev liblzma-dev libclang-dev libpam-dev libnss3-dev
+    - apt-get install -q -y libsqlite3-dev:arm64 liblzma-dev:arm64 libpam-dev:arm64 libnss3-dev:arm64
+    - cargo install cargo-deb
+    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-pam
+    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-nss
+    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-lib
+    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-sync-accountsservice
+    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-guest-warning
+    - mkdir -p packages/debian-bookworm/stable
+    - cp target/aarch64-unknown-linux-gnu/debian/*.deb packages/debian-bookworm/stable
+  artifacts:
+    paths:
+      - packages/debian-bookworm/stable
+    expire_in: 1 week
+    when: always
+
+build-rs:ubuntu-jammy-amd64:
+  stage: build
+  needs:
+    - prepare-rs
+  script:
+    - apt-get update
+    - apt-get install -q -y libsqlite3-dev liblzma-dev libclang-dev libpam-dev libnss3-dev
+    - cargo install cargo-deb
+    - cargo deb -p guest-users-pam
+    - cargo deb -p guest-users-nss
+    - cargo deb -p guest-users-lib
+    - cargo deb -p guest-users-sync-accountsservice
+    - cargo deb -p guest-users-guest-warning
+    - mkdir -p packages/ubuntu-jammy/stable
+    - cp target/debian/*.deb packages/ubuntu-jammy/stable
+  artifacts:
+    paths:
+      - packages/ubuntu-jammy/stable
+    expire_in: 1 week
+    when: always
+
+build-rs:ubuntu-jammy-arm64:
+  stage: build
+  image: dr.rechenknecht.net/bauhelfer/container/main/rust:ubuntu-jammy-amd64-x-arm64
+  needs:
+    - prepare-rs
+  script:
+    - apt-get update
+    - apt-get install -q -y libsqlite3-dev liblzma-dev libclang-dev libpam-dev libnss3-dev
+    - apt-get install -q -y libsqlite3-dev:arm64 liblzma-dev:arm64 libpam-dev:arm64 libnss3-dev:arm64
+    - cargo install cargo-deb
+    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-pam
+    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-nss
+    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-lib
+    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-sync-accountsservice
+    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-guest-warning
+    - mkdir -p packages/ubuntu-jammy/stable
+    - cp target/aarch64-unknown-linux-gnu/debian/*.deb packages/ubuntu-jammy/stable
+  artifacts:
+    paths:
+      - packages/ubuntu-jammy/stable
     expire_in: 1 week
     when: always
 
@@ -73,9 +139,11 @@ pages:
   stage: publish
   image: dr.rechenknecht.net/bauhelfer/container/main/aptly
   needs:
-    - build-rs:ubuntu-jammy
+    - build-rs:debian-bookworm-amd64
+    - build-rs:debian-bookworm-arm64
+    - build-rs:ubuntu-jammy-amd64
+    - build-rs:ubuntu-jammy-arm64
   script:
-    - apt-get update
     - mkdir -p public
     - aptly-ci-new-repo guest-users packages public/packages
   artifacts:

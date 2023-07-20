@@ -6,21 +6,31 @@ It offers a username (specified via `GUEST_USERNAME_NEW_USER`), which creates a 
 
 ## Installation
 
-This project is currently tested with Ubuntu 22.04 (jammy) only.
+This project is currently tested with Ubuntu 22.04 (jammy) and Debian Bookworm. Both `amd64` and `arm64` architectures are supported.
 
 ### From repo
 
-Depending on your distribution, you can add an apt repository (in this case for `ubuntu-jammy`) like this:
+Depending on your distribution, you can add an apt repository like this:
+
+Ubuntu 22.04 (jammy):
 
 ```bash
-echo "deb [trusted=yes] https://mixxplorer.pages.rechenknecht.net/guest-users/packages ubuntu-jammy main" > /etc/apt/sources.list.d/guest-users.list
+echo "deb [trusted=yes] https://mixxplorer.pages.rechenknecht.net/guest-users/packages ubuntu-jammy stable" > /etc/apt/sources.list.d/guest-users.list
 ```
 
-and then you can install the corresponding packages:
+Debian 12 (Bookworm)
+
+```bash
+echo "deb [trusted=yes] https://mixxplorer.pages.rechenknecht.net/guest-users/packages debian-bookworm stable" > /etc/apt/sources.list.d/guest-users.list
+```
+
+Afterwards, you can install the corresponding packages:
 
 ```bash
 apt-get update
 apt-get install guest-users
+# If you want to have a GUI warning message when a guest user gets logged in
+apt-get install guest-users-guest-warning
 ```
 
 ### From dev
