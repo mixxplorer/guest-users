@@ -34,7 +34,7 @@ prepare-rs:
 lint-rs:
   stage: lint
   needs:
-    - build-rs
+    - build-rs:ubuntu-jammy
   script:
     - apt-get update
     - apt-get install -q -y libsqlite3-dev libclang-dev libpam-dev libnss3-dev
@@ -43,7 +43,7 @@ lint-rs:
     - rustup component add rustfmt
     - cargo fmt --all -- --check
 
-build-rs:
+build-rs:ubuntu-jammy:
   stage: build
   needs:
     - prepare-rs
@@ -55,30 +55,29 @@ build-rs:
     - cargo install cargo-deb
     - cargo install diesel_cli --no-default-features --features "sqlite"
     - diesel migration run --database-url=guest_users.db --config-file guest-users-lib/diesel.toml --migration-dir guest-users-lib/migrations
-    - cargo build --release
     - cargo deb -p guest-users-pam
     - cargo deb -p guest-users-nss
     - cargo deb -p guest-users-lib
     - cargo deb -p guest-users-sync-accountsservice
     - cargo deb -p guest-users-guest-warning
+    - mkdir -p packages/ubuntu-jammy/main
+    - cp target/debian/*.deb packages/ubuntu-jammy/main
   artifacts:
     paths:
-      - target/debian
+      - packages/ubuntu-jammy/main
       - guest-users-lib/src/db/schema.rs
     expire_in: 1 week
     when: always
 
 pages:
   stage: publish
+  image: dr.rechenknecht.net/bauhelfer/container/main/aptly
   needs:
-    - build-rs
+    - build-rs:ubuntu-jammy
   script:
     - apt-get update
-    - apt-get install -y dpkg-dev
-    - mkdir -p public/packages/release/main
-    - cd public/packages/release/main
-    - cp -av ../../../../target/debian/*.deb .
-    - dpkg-scanpackages -m . | gzip > Packages.gz
+    - mkdir -p public
+    - aptly-ci-new-repo guest-users packages public/packages
   artifacts:
     paths:
       - public

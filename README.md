@@ -10,10 +10,10 @@ This project is currently tested with Ubuntu 22.04 (jammy) only.
 
 ### From repo
 
-Just add a new repository like
+Depending on your distribution, you can add an apt repository (in this case for `ubuntu-jammy`) like this:
 
 ```bash
-echo "deb [trusted=yes] https://mixxplorer.pages.rechenknecht.net/guest-users/packages/release/main /" > /etc/apt/sources.list.d/guest-users.list
+echo "deb [trusted=yes] https://mixxplorer.pages.rechenknecht.net/guest-users/packages ubuntu-jammy main" > /etc/apt/sources.list.d/guest-users.list
 ```
 
 and then you can install the corresponding packages:
