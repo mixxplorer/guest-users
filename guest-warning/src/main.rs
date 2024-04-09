@@ -14,7 +14,7 @@ struct Args {
     log_level: clap_verbosity_flag::Verbosity,
 }
 
-#[zbus::dbus_proxy(
+#[zbus::proxy(
     default_service = "org.freedesktop.Notifications",
     default_path = "/org/freedesktop/Notifications"
 )]
