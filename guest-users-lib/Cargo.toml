@@ -27,9 +27,9 @@ assets = [
 
 [dependencies]
 anyhow = "~1.0.81"
-log = "~0.4.21"
 config = "~0.14.0"
 diesel = { version = "~2.1.5", features = ["sqlite", "chrono"] }
 diesel_migrations = "~2.1.0"
+log = "~0.4.21"
 nix = { version = "~0.28.0", features = ["user", "fs"] }
 simple_logger = "~4.3.3"
