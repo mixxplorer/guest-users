@@ -9,7 +9,7 @@ license = "MIT"
 
 [package.metadata.deb]
 maintainer = "Leonard Marschke <leo@mixxplorer.de>"
-copyright = "2023, Leonard Marschke <leo@mixxplorer.de>"
+copyright = "2024, Leonard Marschke <leo@mixxplorer.de>"
 license-file = ["../LICENSE", "2"]
 extended-description = """Guest user support, sync users to accounts service\
 Bringing guest users onto your machine.
