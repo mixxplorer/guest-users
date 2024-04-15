@@ -9,7 +9,7 @@ license = "MIT"
 
 [package.metadata.deb]
 maintainer = "Leonard Marschke <leo@mixxplorer.de>"
-copyright = "2023, Leonard Marschke <leo@mixxplorer.de>"
+copyright = "2024, Leonard Marschke <leo@mixxplorer.de>"
 license-file = ["../LICENSE", "2"]
 extended-description = """Guest user support, show a guest user warning message\
 Bringing guest users onto your machine.
@@ -26,11 +26,11 @@ assets = [
 
 [dependencies]
 guest-users-lib = { path="../guest-users-lib" }
-anyhow = "~1.0.71"
-log = "~0.4.17"
-simple_logger = "~4.1.0"
-clap = { version = "~4.2.7", features = ["derive"] }
-clap-verbosity-flag = "~2.0.1"
-zbus = "~3.13.1"
-futures = "~0.3.28"
-nix = "~0.26.2"
+anyhow = "~1.0.81"
+clap = { version = "~4.5.4", features = ["derive"] }
+clap-verbosity-flag = "~2.2.0"
+futures = "~0.3.30"
+log = "~0.4.21"
+nix = { version = "~0.28.0", features = ["user"] }
+simple_logger = "~4.3.3"
+zbus = "~4.1.2"

@@ -14,7 +14,7 @@ crate-type = ["cdylib"]
 
 [package.metadata.deb]
 maintainer = "Leonard Marschke <leo@mixxplorer.de>"
-copyright = "2023, Leonard Marschke <leo@mixxplorer.de>"
+copyright = "2024, Leonard Marschke <leo@mixxplorer.de>"
 license-file = ["../LICENSE", "2"]
 extended-description = """Guest user support, PAM module\
 Bringing guest users onto your machine.
@@ -32,10 +32,10 @@ assets = [
 
 [dependencies]
 guest-users-lib = { path="../guest-users-lib" }
-anyhow = "~1.0.71"
-log = "~0.4.17"
+anyhow = "~1.0.81"
+log = "~0.4.21"
 pam = { git = "https://github.com/lmm-git/pam.git", branch = "fix/pam-module", features = ["module"] }
-config = "~0.13.3"
-simple_logger = "~4.1.0"
-nix = "~0.26.2"
+config = "~0.14.0"
+simple_logger = "~4.3.3"
+nix = { version = "~0.28.0", features = ["user"] }
 utmp-rs = "~0.3.0"
