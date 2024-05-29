@@ -47,135 +47,64 @@ lint-rs:
     - cargo fmt --all -- --check
 
 
-build-rs:debian-bookworm-amd64:
+build-rs:amd64:
   stage: build
   needs:
     - prepare-rs
+  parallel:
+    matrix:
+      - DISTRIBUTION:
+          - debian-bookworm
+          - ubuntu-jammy
+          - ubuntu-noble
+  variables:
+    RUST_TARGET: "x86_64-unknown-linux-gnu"
+  image: dr.rechenknecht.net/bauhelfer/container/main/rust:${DISTRIBUTION}
   script:
     - apt-get update
     - apt-get install -q -y libsqlite3-dev liblzma-dev libclang-dev libpam-dev libnss3-dev
     - cargo install cargo-deb
-    - cargo deb -p guest-users-pam
-    - cargo deb -p guest-users-nss
-    - cargo deb -p guest-users-lib
-    - cargo deb -p guest-users-sync-accountsservice
-    - cargo deb -p guest-users-guest-warning
-    - mkdir -p packages/debian-bookworm/stable
-    - cp target/debian/*.deb packages/debian-bookworm/stable
+    - cargo deb --target ${RUST_TARGET} -p guest-users-pam
+    - cargo deb --target ${RUST_TARGET} -p guest-users-nss
+    - cargo deb --target ${RUST_TARGET} -p guest-users-lib
+    - cargo deb --target ${RUST_TARGET} -p guest-users-sync-accountsservice
+    - cargo deb --target ${RUST_TARGET} -p guest-users-guest-warning
+    - mkdir -p packages/$DISTRIBUTION/stable
+    - cp target/${RUST_TARGET}/debian/*.deb packages/${DISTRIBUTION}/stable
   artifacts:
     paths:
-      - packages/debian-bookworm/stable
+      - packages/${DISTRIBUTION}/stable
     expire_in: 1 week
     when: always
 
-build-rs:debian-bookworm-arm64:
+build-rs:arm64:
   stage: build
-  image: dr.rechenknecht.net/bauhelfer/container/main/rust:debian-bookworm-amd64-x-arm64
   needs:
     - prepare-rs
+  parallel:
+    matrix:
+      - DISTRIBUTION:
+          - debian-bookworm
+          - ubuntu-jammy
+          - ubuntu-noble
+  variables:
+    RUST_TARGET: "aarch64-unknown-linux-gnu"
+  image: dr.rechenknecht.net/bauhelfer/container/main/rust:${DISTRIBUTION}-amd64-x-arm64
   script:
     - apt-get update
     - apt-get install -q -y libsqlite3-dev liblzma-dev libclang-dev libpam-dev libnss3-dev
     - apt-get install -q -y libsqlite3-dev:arm64 liblzma-dev:arm64 libpam-dev:arm64 libnss3-dev:arm64
     - cargo install cargo-deb
-    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-pam
-    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-nss
-    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-lib
-    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-sync-accountsservice
-    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-guest-warning
-    - mkdir -p packages/debian-bookworm/stable
-    - cp target/aarch64-unknown-linux-gnu/debian/*.deb packages/debian-bookworm/stable
+    - cargo deb --target ${RUST_TARGET} -p guest-users-pam
+    - cargo deb --target ${RUST_TARGET} -p guest-users-nss
+    - cargo deb --target ${RUST_TARGET} -p guest-users-lib
+    - cargo deb --target ${RUST_TARGET} -p guest-users-sync-accountsservice
+    - cargo deb --target ${RUST_TARGET} -p guest-users-guest-warning
+    - mkdir -p packages/$DISTRIBUTION/stable
+    - cp target/${RUST_TARGET}/debian/*.deb packages/${DISTRIBUTION}/stable
   artifacts:
     paths:
-      - packages/debian-bookworm/stable
-    expire_in: 1 week
-    when: always
-
-build-rs:ubuntu-jammy-amd64:
-  stage: build
-  needs:
-    - prepare-rs
-  script:
-    - apt-get update
-    - apt-get install -q -y libsqlite3-dev liblzma-dev libclang-dev libpam-dev libnss3-dev
-    - cargo install cargo-deb
-    - cargo deb -p guest-users-pam
-    - cargo deb -p guest-users-nss
-    - cargo deb -p guest-users-lib
-    - cargo deb -p guest-users-sync-accountsservice
-    - cargo deb -p guest-users-guest-warning
-    - mkdir -p packages/ubuntu-jammy/stable
-    - cp target/debian/*.deb packages/ubuntu-jammy/stable
-  artifacts:
-    paths:
-      - packages/ubuntu-jammy/stable
-    expire_in: 1 week
-    when: always
-
-build-rs:ubuntu-jammy-arm64:
-  stage: build
-  image: dr.rechenknecht.net/bauhelfer/container/main/rust:ubuntu-jammy-amd64-x-arm64
-  needs:
-    - prepare-rs
-  script:
-    - apt-get update
-    - apt-get install -q -y libsqlite3-dev liblzma-dev libclang-dev libpam-dev libnss3-dev
-    - apt-get install -q -y libsqlite3-dev:arm64 liblzma-dev:arm64 libpam-dev:arm64 libnss3-dev:arm64
-    - cargo install cargo-deb
-    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-pam
-    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-nss
-    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-lib
-    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-sync-accountsservice
-    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-guest-warning
-    - mkdir -p packages/ubuntu-jammy/stable
-    - cp target/aarch64-unknown-linux-gnu/debian/*.deb packages/ubuntu-jammy/stable
-  artifacts:
-    paths:
-      - packages/ubuntu-jammy/stable
-    expire_in: 1 week
-    when: always
-
-build-rs:ubuntu-noble-amd64:
-  stage: build
-  needs:
-    - prepare-rs
-  script:
-    - apt-get update
-    - apt-get install -q -y libsqlite3-dev liblzma-dev libclang-dev libpam-dev libnss3-dev
-    - cargo install cargo-deb
-    - cargo deb -p guest-users-pam
-    - cargo deb -p guest-users-nss
-    - cargo deb -p guest-users-lib
-    - cargo deb -p guest-users-sync-accountsservice
-    - cargo deb -p guest-users-guest-warning
-    - mkdir -p packages/ubuntu-noble/stable
-    - cp target/debian/*.deb packages/ubuntu-noble/stable
-  artifacts:
-    paths:
-      - packages/ubuntu-noble/stable
-    expire_in: 1 week
-    when: always
-
-build-rs:ubuntu-noble-arm64:
-  stage: build
-  image: dr.rechenknecht.net/bauhelfer/container/main/rust:ubuntu-noble-amd64-x-arm64
-  needs:
-    - prepare-rs
-  script:
-    - apt-get update
-    - apt-get install -q -y libsqlite3-dev liblzma-dev libclang-dev libpam-dev libnss3-dev
-    - apt-get install -q -y libsqlite3-dev:arm64 liblzma-dev:arm64 libpam-dev:arm64 libnss3-dev:arm64
-    - cargo install cargo-deb
-    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-pam
-    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-nss
-    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-lib
-    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-sync-accountsservice
-    - cargo deb --target aarch64-unknown-linux-gnu -p guest-users-guest-warning
-    - mkdir -p packages/ubuntu-noble/stable
-    - cp target/aarch64-unknown-linux-gnu/debian/*.deb packages/ubuntu-noble/stable
-  artifacts:
-    paths:
-      - packages/ubuntu-noble/stable
+      - packages/${DISTRIBUTION}/stable
     expire_in: 1 week
     when: always
 
@@ -183,12 +112,8 @@ pages:
   stage: publish
   image: dr.rechenknecht.net/bauhelfer/container/main/aptly
   needs:
-    - build-rs:debian-bookworm-amd64
-    - build-rs:debian-bookworm-arm64
-    - build-rs:ubuntu-jammy-amd64
-    - build-rs:ubuntu-jammy-arm64
-    - build-rs:ubuntu-noble-amd64
-    - build-rs:ubuntu-noble-arm64
+    - build-rs:amd64
+    - build-rs:arm64
   script:
     - mkdir -p public
     - aptly-ci-new-repo guest-users packages public/packages
