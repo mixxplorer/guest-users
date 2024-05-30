@@ -1,8 +1,4 @@
 extern crate libc;
-#[macro_use]
-extern crate lazy_static;
-#[macro_use]
-extern crate libnss;
 
 use libnss::group::{Group, GroupHooks};
 use libnss::interop::Response;
@@ -15,7 +11,7 @@ mod passwd;
 mod shadow;
 
 struct GuestUsersPasswd;
-libnss_passwd_hooks!(guest_users, GuestUsersPasswd);
+libnss::libnss_passwd_hooks!(guest_users, GuestUsersPasswd);
 
 impl PasswdHooks for GuestUsersPasswd {
     fn get_all_entries() -> Response<Vec<Passwd>> {
@@ -62,7 +58,7 @@ impl PasswdHooks for GuestUsersPasswd {
 }
 
 struct GuestUsersShadow;
-libnss_shadow_hooks!(guest_users, GuestUsersShadow);
+libnss::libnss_shadow_hooks!(guest_users, GuestUsersShadow);
 
 impl ShadowHooks for GuestUsersShadow {
     fn get_all_entries() -> Response<Vec<Shadow>> {
@@ -94,7 +90,7 @@ impl ShadowHooks for GuestUsersShadow {
 }
 
 struct GuestUserGroups;
-libnss_group_hooks!(guest_users, GuestUserGroups);
+libnss::libnss_group_hooks!(guest_users, GuestUserGroups);
 
 impl GroupHooks for GuestUserGroups {
     fn get_all_entries() -> Response<Vec<Group>> {

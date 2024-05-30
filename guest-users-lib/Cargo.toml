@@ -32,4 +32,4 @@ diesel = { version = "~2.1.5", features = ["sqlite", "chrono"] }
 diesel_migrations = "~2.1.0"
 log = "~0.4.21"
 nix = { version = "~0.28.0", features = ["user", "fs"] }
-simple_logger = "~4.3.3"
+simple_logger = "~5.0.0"
