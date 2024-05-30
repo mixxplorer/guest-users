@@ -5,7 +5,6 @@ use libnss::interop::Response;
 use libnss::passwd::{Passwd, PasswdHooks};
 use libnss::shadow::{Shadow, ShadowHooks};
 
-mod gecos;
 mod group;
 mod passwd;
 mod shadow;

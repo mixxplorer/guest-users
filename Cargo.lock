@@ -788,6 +788,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "gecos"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "87931398418a0441b5c4d7f852454f0d2512446be5ed305c98d057ff2dbadf71"
+dependencies = [
+ "thiserror",
+]
+
+[[package]]
 name = "generic-array"
 version = "0.14.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -847,6 +856,7 @@ name = "guest-users-nss"
 version = "0.0.0-dev"
 dependencies = [
  "anyhow",
+ "gecos",
  "guest-users-lib",
  "libc",
  "libnss",
