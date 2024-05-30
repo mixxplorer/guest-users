@@ -54,7 +54,7 @@ async fn notify_if_guest_user() -> Result<(), Box<dyn Error>> {
     log::trace!("Sending notification...");
     let reply = proxy
         .notify(
-            "guest-users",
+            &global_settings.guest_user_warning_app_name,
             0,
             "warning",
             &global_settings.guest_user_warning_title,
