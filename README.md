@@ -59,6 +59,7 @@ You can set the following configuration options:
 | `uid_maximum` | `31999` | Maximum UID for guest users |
 | `gid_minimum` | `31001` | Minimum GID for individual default groups of guest users |
 | `gid_maximum` | `31999` | Maximum GID for individual default groups guest users |
+| `guest_user_warning_app_name` | `Guest User` | App name shown in notifications starting with Gnome 46 |
 | `guest_user_warning_title` | `You are using a guest account` | Title of warning message guest users are shown after logging in |
 | `guest_user_warning_body` | `All data will be deleted on logout. Make sure to store your data on a safe location apart from this device.` | Body of warning message guest users are shown after logging in |
 |`enable_ghost_user` | `true` | Whether to enable a ghost user which will be shown e.g. on login screens |
