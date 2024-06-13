@@ -32,10 +32,8 @@ assets = [
 [dependencies]
 guest-users-lib = { path="../guest-users-lib" }
 anyhow = "~1.0.81"
-config = "~0.14.0"
-lazy_static = "~1.4.0"
-libc = "^0.2.153"
-libnss = "^0.6.0"
+gecos = "~0.1.1"
+libc = "~0.2.153"
+libnss = "~0.8.0"
 log = "~0.4.21"
-paste = "~1.0.14"
-simple_logger = "~4.3.3"
+simple_logger = "~5.0.0"

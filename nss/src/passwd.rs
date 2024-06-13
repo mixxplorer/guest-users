@@ -8,15 +8,18 @@ fn db_to_passwd(
     global_settings: &guest_users_lib::helper::Config,
     user: &guest_users_lib::db::models::User,
 ) -> Result<Passwd, Error> {
-    let gecos = crate::gecos::Gecos {
-        full_name: Some(format!(
-            "{} ({})",
-            global_settings.guest_username_human_readable_prefix, user.id
-        )),
-        room_number: None,
+    let gecos = gecos::Gecos {
+        full_name: Some(
+            format!(
+                "{} ({})",
+                global_settings.guest_username_human_readable_prefix, user.id
+            )
+            .try_into()?,
+        ),
+        room: None,
         work_phone: None,
         home_phone: None,
-        other: None,
+        other: vec![],
     };
 
     let new_passwd_user = Passwd {
@@ -40,12 +43,12 @@ fn get_ghost_user(
     }
 
     // Set human readable username
-    let gecos = crate::gecos::Gecos {
-        full_name: Some(global_settings.ghost_user_gecos_username),
-        room_number: None,
+    let gecos = gecos::Gecos {
+        full_name: Some(global_settings.ghost_user_gecos_username.try_into()?),
+        room: None,
         work_phone: None,
         home_phone: None,
-        other: None,
+        other: vec![],
     };
 
     Ok(Some(Passwd {
