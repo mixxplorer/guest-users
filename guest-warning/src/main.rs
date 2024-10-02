@@ -2,7 +2,7 @@
 #![deny(clippy::all)]
 #![allow(clippy::too_many_arguments)] // allow notify in Notifications trait
 
-use std::{collections::HashMap, convert::TryInto, error::Error};
+use std::{collections::HashMap, error::Error};
 
 use clap::Parser;
 use futures::executor::block_on;
@@ -38,10 +38,7 @@ async fn notify_if_guest_user() -> Result<(), Box<dyn Error>> {
     let cur_user_id = nix::unistd::Uid::current();
     // check whether this user id belongs to a guest user
     let mut db = guest_users_lib::db::DB::new(&global_settings)?;
-    if db
-        .find_user_by_id(cur_user_id.as_raw().try_into()?)?
-        .is_none()
-    {
+    if db.find_user_by_id(cur_user_id.as_raw())?.is_none() {
         log::debug!("User does not seem to be a guest user (not found in guest users DB)");
         return Ok(());
     }

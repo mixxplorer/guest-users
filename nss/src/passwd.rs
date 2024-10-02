@@ -1,4 +1,4 @@
-use std::convert::{TryFrom, TryInto};
+use std::convert::TryInto;
 
 use anyhow::{Context, Error};
 use libnss::interop::Response;
@@ -90,7 +90,7 @@ pub fn get_entry_by_uid(uid: libc::uid_t) -> Result<Response<Passwd>, Error> {
     let global_settings = guest_users_lib::helper::get_config()?;
     let mut db = guest_users_lib::db::DB::new(&global_settings)?;
 
-    if let Some(user) = db.find_user_by_id(i32::try_from(uid)?)? {
+    if let Some(user) = db.find_user_by_id(uid)? {
         return Ok(Response::Success(db_to_passwd(&global_settings, &user)?));
     }
 

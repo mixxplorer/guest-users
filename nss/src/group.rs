@@ -1,5 +1,3 @@
-use std::convert::TryFrom;
-
 use anyhow::Error;
 use libnss::group::Group;
 use libnss::interop::Response;
@@ -41,7 +39,7 @@ pub fn get_entry_by_gid(gid: libc::uid_t) -> Result<Response<Group>, Error> {
     let global_settings = guest_users_lib::helper::get_config()?;
     let mut db = guest_users_lib::db::DB::new(&global_settings)?;
 
-    if let Some(group) = db.find_group_by_id(i32::try_from(gid)?)? {
+    if let Some(group) = db.find_group_by_id(gid)? {
         return Ok(Response::Success(db_to_group(&mut db, &group)?));
     }
 

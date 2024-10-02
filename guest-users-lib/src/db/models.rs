@@ -9,9 +9,9 @@ use crate::db::schema::users;
 #[derive(Identifiable, Insertable, AsChangeset, Queryable, Debug, Clone)]
 #[diesel(table_name = users)]
 pub struct User {
-    pub id: i32,
+    pub id: i64,
     pub user_name: String,
-    pub user_group_id: i32,
+    pub user_group_id: i64,
     pub home_path: String,
     pub boot_id: String,
 }
@@ -19,7 +19,7 @@ pub struct User {
 #[derive(Identifiable, Insertable, AsChangeset, Queryable, Debug, Clone)]
 #[diesel(table_name = groups)]
 pub struct Group {
-    pub id: i32,
+    pub id: i64,
     pub group_name: String,
 }
 
@@ -28,7 +28,7 @@ pub struct Group {
 #[diesel(belongs_to(Group, foreign_key = group_id))]
 #[diesel(table_name = user_group_memberships)]
 pub struct UserGroupMembership {
-    pub id: i32,
-    pub user_id: i32,
-    pub group_id: i32,
+    pub id: i64,
+    pub user_id: i64,
+    pub group_id: i64,
 }

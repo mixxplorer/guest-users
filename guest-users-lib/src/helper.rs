@@ -3,6 +3,8 @@ use std::path::Path;
 
 use anyhow::Context;
 use anyhow::Result;
+use nix::libc::gid_t;
+use nix::libc::uid_t;
 
 const CONFIG_FILE_PATH: &str = "/etc/guest-users/settings.toml";
 
@@ -12,6 +14,12 @@ macro_rules! config_default_item {
     };
     ( $z:expr, $a:ident, i64 ) => {
         $z.get_int(stringify!($a))?
+    };
+    ( $z:expr, $a:ident, uid_t ) => {
+        std::convert::TryInto::<u32>::try_into($z.get_int(stringify!($a))?)?
+    };
+    ( $z:expr, $a:ident, gid_t ) => {
+        std::convert::TryInto::<u32>::try_into($z.get_int(stringify!($a))?)?
     };
     ( $z:expr, $a:ident, bool ) => {
         $z.get_bool(stringify!($a))?
@@ -56,10 +64,10 @@ config_default!(
     home_skel, String, "/etc/skel",
     guest_shell, String, "/bin/bash",
     public_database_path, String, "/etc/guest-users/public.db",
-    uid_minimum, i64, 31001,
-    uid_maximum, i64, 31999,
-    gid_minimum, i64, 31001,
-    gid_maximum, i64, 31999,
+    uid_minimum, uid_t, 31001,
+    uid_maximum, uid_t, 31999,
+    gid_minimum, gid_t, 31001,
+    gid_maximum, gid_t, 31999,
     guest_user_warning_app_name, String, "Guest User",
     guest_user_warning_title, String, "You are using a guest account",
     guest_user_warning_body, String, "All data will be deleted on logout. Make sure to store your data on a safe location apart from this device.",
