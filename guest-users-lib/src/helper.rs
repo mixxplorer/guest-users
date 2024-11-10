@@ -103,7 +103,7 @@ pub fn init_logger() {
 pub fn get_current_os_boot_id() -> Result<String> {
     let random_boot_id = std::fs::read_to_string("/proc/sys/kernel/random/boot_id")
         .context("Unable to read the current boot id from /proc/sys/kernel/random/boot_id")?;
-    Ok(random_boot_id.trim_end_matches(&['\n']).to_string())
+    Ok(random_boot_id.trim_end_matches(['\n']).to_string())
 }
 
 /// Copies a directory and all of its contents and sets to all files a new owner but preserves the access rights.
