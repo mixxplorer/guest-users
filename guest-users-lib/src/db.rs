@@ -67,12 +67,11 @@ impl<'a> DB<'a> {
         })
     }
 
-    fn find_next_unused_user_id_and_name(&mut self) -> Result<(i32, String), Error> {
+    fn find_next_unused_user_id_and_name(&mut self) -> Result<(i64, String), Error> {
         use schema::users::dsl::*;
 
         // find next unused ID
-        let mut max_user_id: i32 =
-            (self.global_settings.uid_minimum.saturating_sub(1)).try_into()?;
+        let mut max_user_id: i64 = self.global_settings.uid_minimum.saturating_sub(1).into();
         if let Some(cur_max_id) = users.select(diesel::dsl::max(id)).first(&mut self.conn)? {
             max_user_id = std::cmp::max(cur_max_id, max_user_id)
         }
@@ -88,7 +87,7 @@ impl<'a> DB<'a> {
         loop {
             next_user_id = next_user_id.checked_add(1).unwrap();
 
-            if next_user_id > self.global_settings.uid_maximum.try_into()? {
+            if next_user_id > self.global_settings.uid_maximum.into() {
                 bail!("No free user id found!");
             }
 
@@ -110,11 +109,10 @@ impl<'a> DB<'a> {
         Ok((next_user_id, next_username))
     }
 
-    fn find_next_unused_group_id_and_name(&mut self) -> Result<(i32, String), Error> {
+    fn find_next_unused_group_id_and_name(&mut self) -> Result<(i64, String), Error> {
         use schema::users::dsl::*;
 
-        let mut max_group_id: i32 =
-            (self.global_settings.gid_minimum.saturating_sub(1)).try_into()?;
+        let mut max_group_id: i64 = self.global_settings.gid_minimum.saturating_sub(1).into();
         if let Some(cur_max_id) = users.select(diesel::dsl::max(id)).first(&mut self.conn)? {
             max_group_id = std::cmp::max(cur_max_id, max_group_id)
         }
@@ -140,7 +138,7 @@ impl<'a> DB<'a> {
             break;
         }
 
-        if next_group_id > self.global_settings.gid_maximum.try_into()? {
+        if next_group_id > self.global_settings.gid_maximum.into() {
             bail!("No free group id found!");
         }
         log::info!("Next free group id is {next_group_id} with name {next_group_name}");
@@ -227,11 +225,14 @@ impl<'a> DB<'a> {
         Ok(users.load::<models::User>(&mut self.conn)?)
     }
 
-    pub fn find_user_by_id(&mut self, uid: i32) -> Result<Option<models::User>, Error> {
+    pub fn find_user_by_id(
+        &mut self,
+        uid: nix::libc::uid_t,
+    ) -> Result<Option<models::User>, Error> {
         use schema::users::dsl::{id, users};
 
         let result = users
-            .filter(id.eq(uid))
+            .filter(id.eq(Into::<i64>::into(uid)))
             .first::<models::User>(&mut self.conn)
             .optional()?;
 
@@ -255,11 +256,14 @@ impl<'a> DB<'a> {
         Ok(groups.load::<models::Group>(&mut self.conn)?)
     }
 
-    pub fn find_group_by_id(&mut self, gid: i32) -> Result<Option<models::Group>, Error> {
+    pub fn find_group_by_id(
+        &mut self,
+        gid: nix::libc::gid_t,
+    ) -> Result<Option<models::Group>, Error> {
         use schema::groups::dsl::{groups, id};
 
         let result = groups
-            .filter(id.eq(gid))
+            .filter(id.eq(Into::<i64>::into(gid)))
             .first::<models::Group>(&mut self.conn)
             .optional()?;
 
