@@ -32,7 +32,7 @@ assets = [
 [dependencies]
 guest-users-lib = { path="../guest-users-lib" }
 anyhow = "~1.0.89"
-gecos = "~0.1.2"
+gecos = "~0.1.3"
 libc = "~0.2.159"
 libnss = "~0.8.0"
 log = "~0.4.22"
