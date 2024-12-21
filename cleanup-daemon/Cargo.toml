@@ -1,9 +1,9 @@
 [package]
-name = "guest-users-sync-accountsservice"
+name = "guest-users-cleanup-daemon"
 version = "0.0.0-dev"
 authors = ["Leonard Marschke <leo@mixxplorer.de>"]
 edition = "2018"
-description = "Guest users support, accounts service sync"
+description = "Guest users support, user home directory cleanup daemon"
 license = "MIT"
 
 
@@ -14,14 +14,14 @@ license-file = ["../LICENSE", "2"]
 extended-description = """Guest user support, sync users to accounts service\
 Bringing guest users onto your machine.
 
-With this module, you can sync guest users (ghost users) to your accounts service."""
+With this module, guest user home directories get automatically cleaned up once they are not needed any more."""
 depends = "guest-users"
 maintainer-scripts = "deb-maintainer-scripts"
 suggests = "guest-users-pam, guest-users-nss"
 section = "utility"
 priority = "optional"
 assets = [
-    ["target/release/guest-users-sync-accountsservice", "usr/bin/guest-users-sync-accountsservice", "755"],
+    ["target/release/guest-users-cleanup-daemon", "usr/bin/guest-users-cleanup-daemon", "755"],
 ]
 systemd-units = { unit-scripts = "deb-services", enable = true }
 
@@ -33,4 +33,5 @@ clap-verbosity-flag = "~3.0.2"
 log = "~0.4.22"
 simple_logger = "~5.0.0"
 tokio = { version = "1", features = ["full"] }
-zbus = "~5.2.0"
+tokio-stream = "0.1"
+zbus = { version = "~5.2.0", features = ["tokio"] }

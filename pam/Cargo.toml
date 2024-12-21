@@ -38,4 +38,3 @@ pam = { git = "https://github.com/lmm-git/pam.git", branch = "fix/pam-module", f
 config = "~0.14.0"
 simple_logger = "~5.0.0"
 nix = { version = "~0.29.0", features = ["user"] }
-utmp-rs = "~0.4.0"

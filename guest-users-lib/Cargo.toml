@@ -15,8 +15,9 @@ extended-description = """Guest user support\
 Bringing guest users onto your machine.
 
 This package provides common files to be used with other guest users packages."""
-depends = "guest-users-pam,guest-users-nss,guest-users-sync-accountsservice"
-suggests = "guest-users-guest-warning"
+depends = "guest-users-pam,  guest-users-nss, guest-users-cleanup-daemon"
+recommends = "guest-users-sync-accountsservice"
+suggests = "guest-users-guest-warning, guest-users-snap-tricks"
 maintainer-scripts = "deb-maintainer-scripts"
 section = "utility"
 priority = "optional"
@@ -32,4 +33,5 @@ diesel = { version = "~2.2.6", features = ["sqlite", "chrono"] }
 diesel_migrations = "~2.2.0"
 log = "~0.4.22"
 nix = { version = "~0.29.0", features = ["user", "fs"] }
+utmp-rs = "~0.4.0"
 simple_logger = "~5.0.0"

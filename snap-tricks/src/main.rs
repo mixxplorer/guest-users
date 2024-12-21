@@ -61,7 +61,7 @@ fn main() -> anyhow::Result<()> {
 
     let global_settings = guest_users_lib::helper::get_config()?;
 
-    let current_snap_extra_home_dirs = std::process::Command::new("snap")
+    let current_snap_extra_home_dirs = std::process::Command::new("/usr/bin/snap")
         .arg("get")
         .arg("system")
         .arg("homedirs")
@@ -75,7 +75,7 @@ fn main() -> anyhow::Result<()> {
         if current_home_dirs != global_settings.home_base_path {
             log::error!("Configure snapd home dirs are '{current_home_dirs}', which is different to the guest users base home dir '{}'", global_settings.home_base_path);
             if args.force {
-                log::error!("Continuing due to force arg!");
+                log::warn!("Continuing due to force arg!");
             } else {
                 anyhow::bail!("Exiting as we cannot ensure this script is overwriting other important configuration! If you want really to overwrite the current setting consider the force option.");
             }
@@ -94,7 +94,7 @@ fn main() -> anyhow::Result<()> {
                 "Setting snap system homedirs={}",
                 global_settings.home_base_path
             );
-            std::process::Command::new("snap")
+            std::process::Command::new("/usr/bin/snap")
                 .arg("set")
                 .arg("system")
                 .arg(format!("homedirs={}", global_settings.home_base_path))
@@ -103,7 +103,7 @@ fn main() -> anyhow::Result<()> {
         }
         CliActions::Uninstall => {
             log::info!("Unsetting snap system homedirs");
-            std::process::Command::new("snap")
+            std::process::Command::new("/usr/bin/snap")
                 .arg("unset")
                 .arg("system")
                 .arg("homedirs")

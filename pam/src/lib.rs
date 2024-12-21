@@ -1,7 +1,6 @@
 use pam::{export_pam_module, PamHandle, PamModule, PamReturnCode};
 
 mod handler;
-mod helper;
 
 pub struct GuestUserPAMModule;
 impl PamModule for GuestUserPAMModule {

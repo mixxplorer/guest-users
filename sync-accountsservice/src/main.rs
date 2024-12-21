@@ -1,10 +1,7 @@
 #![deny(warnings)]
 #![deny(clippy::all)]
 
-use std::error::Error;
-
 use clap::Parser;
-use futures::executor::block_on;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -25,7 +22,7 @@ trait Accounts {
     fn find_user_by_name(&self, username: &str) -> zbus::Result<zbus::zvariant::OwnedObjectPath>;
 }
 
-async fn update_ghost_user() -> Result<(), Box<dyn Error>> {
+async fn update_ghost_user() -> anyhow::Result<()> {
     let global_settings = guest_users_lib::helper::get_config()?;
 
     let connection = zbus::Connection::system().await?;
@@ -54,7 +51,8 @@ async fn update_ghost_user() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn main() {
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
     simple_logger::SimpleLogger::new()
@@ -63,6 +61,5 @@ fn main() {
         .init()
         .unwrap();
 
-    let future = update_ghost_user();
-    block_on(future).unwrap();
+    update_ghost_user().await
 }

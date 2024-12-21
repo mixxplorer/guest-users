@@ -40,9 +40,11 @@ Afterwards, you can install the corresponding packages:
 
 ```bash
 apt-get update
-apt-get install guest-users
+apt-get install --install-recommends guest-users
 # If you want to have a GUI warning message when a guest user gets logged in
 apt-get install guest-users-guest-warning
+# If you have snapd running on your machine and your guest users should be able to use it, use
+apt-get install guest-users-snap-tricks
 ```
 
 ### From dev
@@ -167,3 +169,5 @@ A re-login is permitted as long as the guest user session is active and the syst
 Currently, guest users will only be disabled but not removed. Guest users might have created some resources with their user ID. To reduce the risk implied by user id or group id re-using, this package does not release any assigned ids.
 
 For specific use cases it might make sense to release ids at some point. E.g. if you reset your systems on a regular basis, you might just delete the database, which also releases all claimed IDs.
+
+The user home directories will be removed by the [guest-users-cleanup-daemon]('cleanup-daemon') once users do not have any processes left.

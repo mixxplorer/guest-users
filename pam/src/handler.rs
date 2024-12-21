@@ -96,7 +96,7 @@ pub fn authenticate(
         }
 
         // prevent logging in users without any running sessions (in order to prevent anyone to log in as a previous guest user if no reboot has happened)
-        if !crate::helper::has_active_user_sessions(login_username)? {
+        if !guest_users_lib::helper::has_active_user_sessions(login_username)? {
             log::warn!("User has no associated sessions, preventing login!");
             return Ok(PamReturnCode::Auth_Err);
         } else {
