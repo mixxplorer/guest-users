@@ -935,6 +935,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "guest-users-snap-tricks"
+version = "0.0.0-dev"
+dependencies = [
+ "anyhow",
+ "clap",
+ "clap-verbosity-flag",
+ "guest-users-lib",
+ "log",
+ "simple_logger",
+]
+
+[[package]]
 name = "guest-users-sync-accountsservice"
 version = "0.0.0-dev"
 dependencies = [
