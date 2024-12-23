@@ -32,5 +32,5 @@ clap = { version = "~4.5.23", features = ["derive"] }
 clap-verbosity-flag = "~3.0.2"
 log = "~0.4.22"
 simple_logger = "~5.0.0"
-tokio = { version = "1", features = ["full"] }
-zbus = "~5.2.0"
+tokio = { version = "1", features = ["macros", "rt"] }
+zbus = { version = "~5.2.0", features = ["tokio"] }

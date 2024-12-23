@@ -87,8 +87,14 @@ async fn session_end_listener() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
+fn main() -> anyhow::Result<()> {
+    tokio::runtime::Builder::new_current_thread()
+        .build()
+        .unwrap()
+        .block_on(main_async())
+}
+
+async fn main_async() -> anyhow::Result<()> {
     let args = Args::parse();
 
     simple_logger::SimpleLogger::new()
