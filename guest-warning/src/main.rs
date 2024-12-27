@@ -2,10 +2,7 @@
 #![deny(clippy::all)]
 #![allow(clippy::too_many_arguments)] // allow notify in Notifications trait
 
-use std::{collections::HashMap, error::Error};
-
 use clap::Parser;
-use futures::executor::block_on;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -27,12 +24,12 @@ trait Notifications {
         summary: &str,
         body: &str,
         actions: &[&str],
-        hints: HashMap<&str, &zbus::zvariant::Value<'_>>,
+        hints: std::collections::HashMap<&str, &zbus::zvariant::Value<'_>>,
         expire_timeout: i32,
     ) -> zbus::Result<u32>;
 }
 
-async fn notify_if_guest_user() -> Result<(), Box<dyn Error>> {
+async fn notify_if_guest_user() -> anyhow::Result<()> {
     let global_settings = guest_users_lib::helper::get_config()?;
 
     let cur_user_id = nix::unistd::Uid::current();
@@ -57,7 +54,7 @@ async fn notify_if_guest_user() -> Result<(), Box<dyn Error>> {
             &global_settings.guest_user_warning_title,
             &global_settings.guest_user_warning_body,
             &[],
-            HashMap::from([("urgency", &zbus::zvariant::Value::I16(2))]),
+            std::collections::HashMap::from([("urgency", &zbus::zvariant::Value::I16(2))]),
             0,
         )
         .await?;
@@ -66,7 +63,14 @@ async fn notify_if_guest_user() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn main() {
+fn main() -> anyhow::Result<()> {
+    tokio::runtime::Builder::new_current_thread()
+        .build()
+        .unwrap()
+        .block_on(main_async())
+}
+
+async fn main_async() -> anyhow::Result<()> {
     let args = Args::parse();
 
     simple_logger::SimpleLogger::new()
@@ -75,6 +79,5 @@ fn main() {
         .init()
         .unwrap();
 
-    let future = notify_if_guest_user();
-    block_on(future).unwrap();
+    notify_if_guest_user().await
 }

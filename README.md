@@ -40,9 +40,11 @@ Afterwards, you can install the corresponding packages:
 
 ```bash
 apt-get update
-apt-get install guest-users
+apt-get install --install-recommends guest-users
 # If you want to have a GUI warning message when a guest user gets logged in
 apt-get install guest-users-guest-warning
+# If you have snapd running on your machine and your guest users should be able to use it, use
+apt-get install guest-users-snap-tricks
 ```
 
 ### From dev
@@ -63,7 +65,7 @@ You can set the following configuration options:
 | `guest_username_prefix` | `guest` | A prefix all guest usernames are prepended with |
 | `guest_username_human_readable_prefix` | `Guest` | A prefix all human readable guest usernames are prepended with |
 | `guest_group_name_prefix` | `guest` | A prefix all guest group names are prepended with |
-| `home_base_path` | `/tmp/guest-users-home` | Base path for guest home directories (we recommend a directory, which gets cleaned during reboot) |
+| `home_base_path` | `/home/guest-users` | Base path for guest home directories. If it is outside `/home`, snap will not work with default (our) configuration. |
 | `home_skel` | `/etc/skel` | Skeleton home directory being copied to every new guest user |
 | `guest_shell` | `/bin/bash` | Shell, which will be used for all guest users |
 | `public_database_path` | `/etc/guest-users/public.db` | Database path for guest users (sqlite) |
@@ -167,3 +169,5 @@ A re-login is permitted as long as the guest user session is active and the syst
 Currently, guest users will only be disabled but not removed. Guest users might have created some resources with their user ID. To reduce the risk implied by user id or group id re-using, this package does not release any assigned ids.
 
 For specific use cases it might make sense to release ids at some point. E.g. if you reset your systems on a regular basis, you might just delete the database, which also releases all claimed IDs.
+
+The user home directories will be removed by the [guest-users-cleanup-daemon]('cleanup-daemon') once users do not have any processes left.

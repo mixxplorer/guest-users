@@ -1,5 +1,5 @@
 [workspace]
-members = ["guest-users-lib", "pam", "nss", "sync-accountsservice", "guest-warning"]
+members = ["cleanup-daemon", "guest-users-lib", "pam", "nss", "sync-accountsservice", "guest-warning", "snap-tricks"]
 
 [profile.release]
 # Add some settings for shrinking the binary size significantly for release builds

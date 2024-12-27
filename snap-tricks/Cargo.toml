@@ -1,9 +1,9 @@
 [package]
-name = "guest-users-sync-accountsservice"
+name = "guest-users-snap-tricks"
 version = "0.0.0-dev"
 authors = ["Leonard Marschke <leo@mixxplorer.de>"]
 edition = "2018"
-description = "Guest users support, accounts service sync"
+description = "Guest users support, snap tricks"
 license = "MIT"
 
 
@@ -14,16 +14,14 @@ license-file = ["../LICENSE", "2"]
 extended-description = """Guest user support, sync users to accounts service\
 Bringing guest users onto your machine.
 
-With this module, you can sync guest users (ghost users) to your accounts service."""
-depends = "guest-users"
+With this module, you can automatically configure snap so guest users will be able to use snap apps."""
+depends = "guest-users, snapd"
 maintainer-scripts = "deb-maintainer-scripts"
-suggests = "guest-users-pam, guest-users-nss"
 section = "utility"
 priority = "optional"
 assets = [
-    ["target/release/guest-users-sync-accountsservice", "usr/bin/guest-users-sync-accountsservice", "755"],
+    ["target/release/guest-users-snap-tricks", "usr/bin/guest-users-snap-tricks", "755"],
 ]
-systemd-units = { unit-scripts = "deb-services", enable = true }
 
 [dependencies]
 guest-users-lib = { path="../guest-users-lib" }
@@ -32,5 +30,3 @@ clap = { version = "~4.5.23", features = ["derive"] }
 clap-verbosity-flag = "~3.0.2"
 log = "~0.4.22"
 simple_logger = "~5.0.0"
-tokio = { version = "1", features = ["macros", "rt"] }
-zbus = { version = "~5.2.0", features = ["tokio"] }

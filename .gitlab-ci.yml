@@ -9,27 +9,31 @@ stages:
 variables:
   # This will instruct Docker not to start over TLS.
   DOCKER_TLS_CERTDIR: ""
-  PACKAGE_BASE_VERSION: "0.1"
+  PACKAGE_BASE_VERSION: "0.2"
 
 prepare-rs:
   stage: prepare
   needs: []
   script:
      - export COMMIT_COUNT=`git rev-list --count HEAD`
-     - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" pam/Cargo.toml
-     - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" nss/Cargo.toml
+     - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" cleanup-daemon/Cargo.toml
      - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" guest-users-lib/Cargo.toml
-     - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" sync-accountsservice/Cargo.toml
      - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" guest-warning/Cargo.toml
+     - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" nss/Cargo.toml
+     - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" pam/Cargo.toml
+     - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" snap-tricks/Cargo.toml
+     - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" sync-accountsservice/Cargo.toml
      - cargo install diesel_cli --no-default-features --features "sqlite"
      - diesel migration run --database-url=guest_users.db --config-file guest-users-lib/diesel.toml --migration-dir guest-users-lib/migrations
   artifacts:
     paths:
+      - cleanup-daemon/Cargo.toml
       - guest-users-lib/Cargo.toml
+      - guest-warning/Cargo.toml
       - nss/Cargo.toml
       - pam/Cargo.toml
+      - snap-tricks/Cargo.toml
       - sync-accountsservice/Cargo.toml
-      - guest-warning/Cargo.toml
       - guest-users-lib/src/db/schema.rs
     expire_in: 1 year
     when: always
@@ -64,11 +68,13 @@ build-rs:amd64:
     - apt-get update
     - apt-get install -q -y libsqlite3-dev liblzma-dev libclang-dev libpam-dev libnss3-dev
     - cargo install cargo-deb
-    - cargo deb --target ${RUST_TARGET} -p guest-users-pam
-    - cargo deb --target ${RUST_TARGET} -p guest-users-nss
-    - cargo deb --target ${RUST_TARGET} -p guest-users-lib
-    - cargo deb --target ${RUST_TARGET} -p guest-users-sync-accountsservice
+    - cargo deb --target ${RUST_TARGET} -p guest-users-cleanup-daemon
     - cargo deb --target ${RUST_TARGET} -p guest-users-guest-warning
+    - cargo deb --target ${RUST_TARGET} -p guest-users-lib
+    - cargo deb --target ${RUST_TARGET} -p guest-users-nss
+    - cargo deb --target ${RUST_TARGET} -p guest-users-pam
+    - cargo deb --target ${RUST_TARGET} -p guest-users-snap-tricks
+    - cargo deb --target ${RUST_TARGET} -p guest-users-sync-accountsservice
     - mkdir -p packages/$DISTRIBUTION/stable
     - cp target/${RUST_TARGET}/debian/*.deb packages/${DISTRIBUTION}/stable
   artifacts:
@@ -95,11 +101,13 @@ build-rs:arm64:
     - apt-get install -q -y libsqlite3-dev liblzma-dev libclang-dev libpam-dev libnss3-dev
     - apt-get install -q -y libsqlite3-dev:arm64 liblzma-dev:arm64 libpam-dev:arm64 libnss3-dev:arm64
     - cargo install cargo-deb
-    - cargo deb --target ${RUST_TARGET} -p guest-users-pam
-    - cargo deb --target ${RUST_TARGET} -p guest-users-nss
-    - cargo deb --target ${RUST_TARGET} -p guest-users-lib
-    - cargo deb --target ${RUST_TARGET} -p guest-users-sync-accountsservice
+    - cargo deb --target ${RUST_TARGET} -p guest-users-cleanup-daemon
     - cargo deb --target ${RUST_TARGET} -p guest-users-guest-warning
+    - cargo deb --target ${RUST_TARGET} -p guest-users-lib
+    - cargo deb --target ${RUST_TARGET} -p guest-users-nss
+    - cargo deb --target ${RUST_TARGET} -p guest-users-pam
+    - cargo deb --target ${RUST_TARGET} -p guest-users-snap-tricks
+    - cargo deb --target ${RUST_TARGET} -p guest-users-sync-accountsservice
     - mkdir -p packages/$DISTRIBUTION/stable
     - cp target/${RUST_TARGET}/debian/*.deb packages/${DISTRIBUTION}/stable
   artifacts:
