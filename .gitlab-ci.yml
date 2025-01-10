@@ -1,4 +1,4 @@
-image: dr.rechenknecht.net/bauhelfer/container/main/rust:ubuntu-jammy
+image: dr.rechenknecht.net/bauhelfer/container/main/rust:ubuntu-noble
 
 stages:
   - prepare
