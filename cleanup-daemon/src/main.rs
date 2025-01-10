@@ -89,6 +89,7 @@ async fn session_end_listener() -> anyhow::Result<()> {
 
 fn main() -> anyhow::Result<()> {
     tokio::runtime::Builder::new_current_thread()
+        .enable_io()
         .build()
         .unwrap()
         .block_on(main_async())

@@ -53,6 +53,7 @@ async fn update_ghost_user() -> anyhow::Result<()> {
 
 fn main() -> anyhow::Result<()> {
     tokio::runtime::Builder::new_current_thread()
+        .enable_io()
         .build()
         .unwrap()
         .block_on(main_async())
