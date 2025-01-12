@@ -131,6 +131,8 @@ Then, you can make use of this one-liner to build all Debian packages:
 cargo deb -p guest-users-pam && cargo deb -p guest-users-nss && cargo deb -p guest-users-lib && cargo deb -p guest-users-sync-accountsservice && cargo deb -p guest-users-guest-warning && cargo deb -p guest-users-cleanup-daemon
 ```
 
+The resulting `.deb` packages are then built in `target/debian` and can be installed with `dpkg`.
+
 ## Architecture
 
 This section describes a few architectural decisions taken during development of this package. This section shouldn't be necessary to read for using the package, but might be helpful before touching the code.
