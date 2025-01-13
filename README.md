@@ -128,8 +128,10 @@ cargo install cargo-deb
 Then, you can make use of this one-liner to build all Debian packages:
 
 ```bash
-cargo deb -p guest-users-pam && cargo deb -p guest-users-nss && cargo deb -p guest-users-lib && cargo deb -p guest-users-sync-accountsservice && cargo deb -p guest-users-guest-warning
+cargo deb -p guest-users-pam && cargo deb -p guest-users-nss && cargo deb -p guest-users-lib && cargo deb -p guest-users-sync-accountsservice && cargo deb -p guest-users-guest-warning && cargo deb -p guest-users-cleanup-daemon
 ```
+
+The resulting `.deb` packages are then built in `target/debian` and can be installed with `dpkg`.
 
 ## Architecture
 
