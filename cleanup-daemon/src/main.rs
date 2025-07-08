@@ -12,34 +12,12 @@ struct Args {
     log_level: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
 }
 
-#[zbus::proxy(
-    interface = "org.freedesktop.login1.Manager",
-    default_service = "org.freedesktop.login1",
-    default_path = "/org/freedesktop/login1"
-)]
-pub trait LoginManager {
-    /// SessionNew signal
-    #[zbus(signal)]
-    fn session_new(
-        &self,
-        session_id: &str,
-        object_path: zbus::zvariant::ObjectPath<'_>,
-    ) -> zbus::Result<()>;
-
-    /// SessionRemoved signal
-    #[zbus(signal)]
-    fn session_removed(
-        &self,
-        session_id: &str,
-        object_path: zbus::zvariant::ObjectPath<'_>,
-    ) -> zbus::Result<()>;
-}
-
 async fn session_end_listener() -> anyhow::Result<()> {
     let global_settings = guest_users_lib::helper::get_config()?;
 
     let system_connection = zbus::Connection::system().await?;
-    let login_interface = LoginManagerProxy::new(&system_connection).await?;
+    let login_interface =
+        guest_users_lib::zbus::login_manager::LoginManagerProxy::new(&system_connection).await?;
 
     let mut session_end_events = login_interface.receive_session_removed().await?;
     log::debug!("Set up receiver for session end events!");
@@ -66,7 +44,22 @@ async fn session_end_listener() -> anyhow::Result<()> {
                     log::warn!("{home_path:?} not in home_base_path={home_base_path:?}, skipping deletion!")
                 } else {
                     // check if user has a session
-                    if !guest_users_lib::helper::has_active_user_sessions(&user.user_name)? {
+                    if !guest_users_lib::helper::has_active_user_sessions(user.id).await? {
+                        // notify accountservice
+                        log::info!(
+                            "Notifying account service to uncache user {}",
+                            &user.user_name
+                        );
+                        let accounts_server_interface =
+                            guest_users_lib::zbus::accounts_service::AccountsProxy::builder(
+                                &system_connection,
+                            )
+                            .build()
+                            .await?;
+                        accounts_server_interface
+                            .uncache_user(&user.user_name)
+                            .await?;
+
                         log::info!(
                             "Removing home directory {home_path:?} of user {}",
                             user.user_name

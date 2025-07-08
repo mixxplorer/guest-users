@@ -96,7 +96,11 @@ pub fn authenticate(
         }
 
         // prevent logging in users without any running sessions (in order to prevent anyone to log in as a previous guest user if no reboot has happened)
-        if !guest_users_lib::helper::has_active_user_sessions(login_username)? {
+        let has_active_user_sessions = tokio::runtime::Builder::new_current_thread()
+            .enable_io()
+            .build()?
+            .block_on(async { guest_users_lib::helper::has_active_user_sessions(user.id).await })?;
+        if !has_active_user_sessions {
             log::warn!("User has no associated sessions, preventing login!");
             return Ok(PamReturnCode::Auth_Err);
         } else {
