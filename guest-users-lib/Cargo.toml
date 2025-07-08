@@ -27,11 +27,11 @@ assets = [
 ]
 
 [dependencies]
-anyhow = "~1.0.94"
-config = "~0.14.0"
-diesel = { version = "~2.2.6", features = ["sqlite", "chrono"] }
+anyhow = "~1.0.98"
+config = "~0.15.11"
+diesel = { version = "~2.2.11", features = ["sqlite", "chrono"] }
 diesel_migrations = "~2.2.0"
-log = "~0.4.22"
-nix = { version = "~0.29.0", features = ["user", "fs"] }
+log = "~0.4.27"
+nix = { version = "~0.30.1", features = ["user", "fs"] }
 utmp-rs = "~0.4.0"
 simple_logger = "~5.0.0"
