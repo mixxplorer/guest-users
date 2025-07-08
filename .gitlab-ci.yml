@@ -14,6 +14,9 @@ variables:
 prepare-rs:
   stage: prepare
   needs: []
+  variables:
+    # Disable shallow-clone for this step as this would impair git rev-list
+    GIT_DEPTH: 0
   script:
      - export COMMIT_COUNT=`git rev-list --count HEAD`
      - sed -i "s/0.0.0-dev/${PACKAGE_BASE_VERSION}.${COMMIT_COUNT}-${CI_PIPELINE_IID}/g" cleanup-daemon/Cargo.toml
