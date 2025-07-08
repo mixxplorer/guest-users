@@ -33,5 +33,5 @@ diesel = { version = "~2.2.11", features = ["sqlite", "chrono"] }
 diesel_migrations = "~2.2.0"
 log = "~0.4.27"
 nix = { version = "~0.30.1", features = ["user", "fs"] }
-utmp-rs = "~0.4.0"
 simple_logger = "~5.0.0"
+zbus = { version = "~5.8.0", features = ["tokio", "blocking"] }

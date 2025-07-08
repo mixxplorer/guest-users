@@ -10,23 +10,11 @@ struct Args {
     log_level: clap_verbosity_flag::Verbosity,
 }
 
-#[zbus::proxy(
-    default_service = "org.freedesktop.Accounts",
-    default_path = "/org/freedesktop/Accounts"
-)]
-trait Accounts {
-    fn cache_user(&self, username: &str) -> zbus::Result<zbus::zvariant::OwnedObjectPath>;
-
-    fn uncache_user(&self, username: &str) -> zbus::Result<()>;
-
-    fn find_user_by_name(&self, username: &str) -> zbus::Result<zbus::zvariant::OwnedObjectPath>;
-}
-
 async fn update_ghost_user() -> anyhow::Result<()> {
     let global_settings = guest_users_lib::helper::get_config()?;
 
     let connection = zbus::Connection::system().await?;
-    let proxy = AccountsProxy::new(&connection).await?;
+    let proxy = guest_users_lib::zbus::accounts_service::AccountsProxy::new(&connection).await?;
 
     if global_settings.enable_ghost_user {
         let reply = proxy
