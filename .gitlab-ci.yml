@@ -9,7 +9,7 @@ stages:
 variables:
   # This will instruct Docker not to start over TLS.
   DOCKER_TLS_CERTDIR: ""
-  PACKAGE_BASE_VERSION: "0.3"
+  PACKAGE_BASE_VERSION: "0.4"
 
 prepare-rs:
   stage: prepare
