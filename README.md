@@ -65,14 +65,17 @@ You can set the following configuration options:
 | `guest_username_prefix` | `guest` | A prefix all guest usernames are prepended with |
 | `guest_username_human_readable_prefix` | `Guest` | A prefix all human readable guest usernames are prepended with |
 | `guest_group_name_prefix` | `guest` | A prefix all guest group names are prepended with |
+| `enable_guest_common_group` | `false` | Whether a common group for all guest users is enabled |
+| `guest_common_group_name` | `guest-users` | A group name for the common group, which all guest users are member of |
+| `guest_common_group_gid` | `31001` | A gid of the group name of the common group, which all guest users are member of |
 | `home_base_path` | `/home/guest-users` | Base path for guest home directories. If it is outside `/home`, snap will not work with default (our) configuration. |
 | `home_skel` | `/etc/skel` | Skeleton home directory being copied to every new guest user |
 | `guest_shell` | `/bin/bash` | Shell, which will be used for all guest users |
 | `public_database_path` | `/etc/guest-users/public.db` | Database path for guest users (sqlite) |
-| `uid_minimum` | `31001` | Minimum UID for guest users (make sure these IDs are and will be really available) |
+| `uid_minimum` | `31010` | Minimum UID for guest users (make sure these IDs are and will be really available) |
 | `uid_maximum` | `31999` | Maximum UID for guest users (make sure these IDs are and will be really available) |
-| `gid_minimum` | `31001` | Minimum GID for individual default groups of guest users (make sure these IDs are and will be really available) |
-| `gid_maximum` | `31999` | Maximum GID for individual default groups guest users (make sure these IDs are and will be really available) |
+| `gid_minimum` | `31010` | Minimum GID for individual default groups of guest users (make sure these IDs are and will be really available) |
+| `gid_maximum` | `31999` | Maximum GID for individual default groups of guest users (make sure these IDs are and will be really available) |
 | `guest_user_warning_app_name` | `Guest User` | App name shown in notifications starting with Gnome 46 |
 | `guest_user_warning_title` | `You are using a guest account` | Title of warning message guest users are shown after logging in |
 | `guest_user_warning_body` | `All data will be deleted on logout. Make sure to store your data on a safe location apart from this device.` | Body of warning message guest users are shown after logging in |

@@ -24,7 +24,7 @@ fn db_to_group(
 }
 
 fn get_ghost_group(
-    global_settings: guest_users_lib::helper::Config,
+    global_settings: &guest_users_lib::helper::Config,
 ) -> Result<Option<Group>, Error> {
     if !global_settings.enable_ghost_user {
         return Ok(None);
@@ -37,8 +37,24 @@ fn get_ghost_group(
             .ghost_user_gid
             .try_into()
             .context("Unable to parse ghost user gid as u32")?,
-        members: vec![global_settings.guest_username_new_user],
+        members: vec![global_settings.guest_username_new_user.clone()],
     }))
+}
+
+fn get_common_group(
+    db: &mut guest_users_lib::db::DB,
+    global_settings: &guest_users_lib::helper::Config,
+) -> Result<Group, Error> {
+    Ok(Group {
+        name: global_settings.guest_common_group_name.clone(),
+        passwd: "x".to_string(), // disable password for group
+        gid: global_settings.guest_common_group_gid,
+        members: db
+            .get_users()?
+            .iter()
+            .map(|user| user.user_name.clone())
+            .collect(),
+    })
 }
 
 pub fn get_all_entries() -> Result<Response<Vec<Group>>, Error> {
@@ -52,8 +68,12 @@ pub fn get_all_entries() -> Result<Response<Vec<Group>>, Error> {
         groups.push(db_to_group(&mut db, group)?);
     }
 
-    if let Some(ghost_group) = get_ghost_group(global_settings)? {
+    if let Some(ghost_group) = get_ghost_group(&global_settings)? {
         groups.push(ghost_group);
+    }
+
+    if global_settings.enable_guest_common_group {
+        groups.push(get_common_group(&mut db, &global_settings)?);
     }
 
     Ok(Response::Success(groups))
@@ -67,10 +87,17 @@ pub fn get_entry_by_gid(gid: libc::uid_t) -> Result<Response<Group>, Error> {
         return Ok(Response::Success(db_to_group(&mut db, &group)?));
     }
 
-    if let Some(ghost_group) = get_ghost_group(global_settings)? {
+    if let Some(ghost_group) = get_ghost_group(&global_settings)? {
         if ghost_group.gid == gid {
             return Ok(Response::Success(ghost_group));
         }
+    }
+
+    if global_settings.enable_guest_common_group && global_settings.guest_common_group_gid == gid {
+        return Ok(Response::Success(get_common_group(
+            &mut db,
+            &global_settings,
+        )?));
     }
 
     Ok(Response::NotFound)
@@ -84,10 +111,18 @@ pub fn get_entry_by_name(name: &str) -> Result<Response<Group>, Error> {
         return Ok(Response::Success(db_to_group(&mut db, &group)?));
     }
 
-    if let Some(ghost_group) = get_ghost_group(global_settings)? {
+    if let Some(ghost_group) = get_ghost_group(&global_settings)? {
         if ghost_group.name == name {
             return Ok(Response::Success(ghost_group));
         }
+    }
+
+    if global_settings.enable_guest_common_group && global_settings.guest_common_group_name == name
+    {
+        return Ok(Response::Success(get_common_group(
+            &mut db,
+            &global_settings,
+        )?));
     }
 
     Ok(Response::NotFound)
