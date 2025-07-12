@@ -18,7 +18,6 @@ use std::os::unix::prelude::PermissionsExt;
 use std::path::Path;
 
 use anyhow::Context;
-use anyhow::Error;
 
 use nix::unistd::chown;
 use nix::unistd::geteuid;
@@ -35,7 +34,7 @@ pub struct DB<'a> {
 }
 
 impl<'a> DB<'a> {
-    pub fn new(global_settings: &'a Config) -> Result<Self, Error> {
+    pub fn new(global_settings: &'a Config) -> anyhow::Result<Self> {
         log::trace!("Creating new DB object");
         let database_url = &global_settings.public_database_path;
         let mut conn = diesel::SqliteConnection::establish(database_url)
@@ -67,7 +66,7 @@ impl<'a> DB<'a> {
         })
     }
 
-    fn find_next_unused_user_id_and_name(&mut self) -> Result<(i64, String), Error> {
+    fn find_next_unused_user_id_and_name(&mut self) -> anyhow::Result<(i64, String)> {
         use schema::users::dsl::*;
 
         // find next unused ID
@@ -109,7 +108,7 @@ impl<'a> DB<'a> {
         Ok((next_user_id, next_username))
     }
 
-    fn find_next_unused_group_id_and_name(&mut self) -> Result<(i64, String), Error> {
+    fn find_next_unused_group_id_and_name(&mut self) -> anyhow::Result<(i64, String)> {
         use schema::users::dsl::*;
 
         let mut max_group_id: i64 = self.global_settings.gid_minimum.saturating_sub(1).into();
@@ -145,7 +144,7 @@ impl<'a> DB<'a> {
         Ok((next_group_id, next_group_name))
     }
 
-    pub fn create_guest_user(&mut self) -> Result<models::User, Error> {
+    pub fn create_guest_user(&mut self) -> anyhow::Result<models::User> {
         let (group_id, group_name) = self.find_next_unused_group_id_and_name()?;
 
         let target_group = models::Group {
@@ -216,7 +215,7 @@ impl<'a> DB<'a> {
         Ok(target_user)
     }
 
-    pub fn get_users(&mut self) -> Result<Vec<models::User>, Error> {
+    pub fn get_users(&mut self) -> anyhow::Result<Vec<models::User>> {
         use schema::users::dsl::users;
 
         Ok(users.load::<models::User>(&mut self.conn)?)
@@ -225,7 +224,7 @@ impl<'a> DB<'a> {
     pub fn find_user_by_id(
         &mut self,
         uid: nix::libc::uid_t,
-    ) -> Result<Option<models::User>, Error> {
+    ) -> anyhow::Result<Option<models::User>> {
         use schema::users::dsl::{id, users};
 
         let result = users
@@ -236,7 +235,7 @@ impl<'a> DB<'a> {
         Ok(result)
     }
 
-    pub fn find_user_by_name(&mut self, name: &str) -> Result<Option<models::User>, Error> {
+    pub fn find_user_by_name(&mut self, name: &str) -> anyhow::Result<Option<models::User>> {
         use schema::users::dsl::{user_name, users};
 
         let result = users
@@ -247,7 +246,7 @@ impl<'a> DB<'a> {
         Ok(result)
     }
 
-    pub fn get_groups(&mut self) -> Result<Vec<models::Group>, Error> {
+    pub fn get_groups(&mut self) -> anyhow::Result<Vec<models::Group>> {
         use schema::groups::dsl::groups;
 
         Ok(groups.load::<models::Group>(&mut self.conn)?)
@@ -256,7 +255,7 @@ impl<'a> DB<'a> {
     pub fn find_group_by_id(
         &mut self,
         gid: nix::libc::gid_t,
-    ) -> Result<Option<models::Group>, Error> {
+    ) -> anyhow::Result<Option<models::Group>> {
         use schema::groups::dsl::{groups, id};
 
         let result = groups
@@ -267,7 +266,7 @@ impl<'a> DB<'a> {
         Ok(result)
     }
 
-    pub fn find_group_by_name(&mut self, name: &str) -> Result<Option<models::Group>, Error> {
+    pub fn find_group_by_name(&mut self, name: &str) -> anyhow::Result<Option<models::Group>> {
         use schema::groups::dsl::{group_name, groups};
 
         let result = groups
@@ -281,7 +280,7 @@ impl<'a> DB<'a> {
     pub fn find_users_for_group(
         &mut self,
         match_group: &models::Group,
-    ) -> Result<Vec<(models::UserGroupMembership, models::User)>, Error> {
+    ) -> anyhow::Result<Vec<(models::UserGroupMembership, models::User)>> {
         Ok(models::UserGroupMembership::belonging_to(match_group)
             .inner_join(schema::users::dsl::users)
             .load::<(models::UserGroupMembership, models::User)>(&mut self.conn)?)

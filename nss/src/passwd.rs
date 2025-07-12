@@ -1,13 +1,13 @@
 use std::convert::TryInto;
 
-use anyhow::{Context, Error};
+use anyhow::Context;
 use libnss::interop::Response;
 use libnss::passwd::Passwd;
 
 fn db_to_passwd(
     global_settings: &guest_users_lib::helper::Config,
     user: &guest_users_lib::db::models::User,
-) -> Result<Passwd, Error> {
+) -> anyhow::Result<Passwd> {
     let gecos = gecos::Gecos {
         full_name: Some(
             format!(
@@ -37,7 +37,7 @@ fn db_to_passwd(
 
 fn get_ghost_user(
     global_settings: guest_users_lib::helper::Config,
-) -> Result<Option<Passwd>, Error> {
+) -> anyhow::Result<Option<Passwd>> {
     if !global_settings.enable_ghost_user {
         return Ok(None);
     }
@@ -68,7 +68,7 @@ fn get_ghost_user(
     }))
 }
 
-pub fn get_all_entries() -> Result<Response<Vec<Passwd>>, Error> {
+pub fn get_all_entries() -> anyhow::Result<Response<Vec<Passwd>>> {
     let global_settings = guest_users_lib::helper::get_config()?;
     let mut db = guest_users_lib::db::DB::new(&global_settings)?;
 
@@ -86,7 +86,7 @@ pub fn get_all_entries() -> Result<Response<Vec<Passwd>>, Error> {
     Ok(Response::Success(passwd_users))
 }
 
-pub fn get_entry_by_uid(uid: libc::uid_t) -> Result<Response<Passwd>, Error> {
+pub fn get_entry_by_uid(uid: libc::uid_t) -> anyhow::Result<Response<Passwd>> {
     let global_settings = guest_users_lib::helper::get_config()?;
     let mut db = guest_users_lib::db::DB::new(&global_settings)?;
 
@@ -103,7 +103,7 @@ pub fn get_entry_by_uid(uid: libc::uid_t) -> Result<Response<Passwd>, Error> {
     Ok(Response::NotFound)
 }
 
-pub fn get_entry_by_name(name: &str) -> Result<Response<Passwd>, Error> {
+pub fn get_entry_by_name(name: &str) -> anyhow::Result<Response<Passwd>> {
     let global_settings = guest_users_lib::helper::get_config()?;
     let mut db = guest_users_lib::db::DB::new(&global_settings)?;
 

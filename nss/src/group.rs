@@ -1,13 +1,13 @@
 use std::convert::TryInto;
 
-use anyhow::{Context, Error};
+use anyhow::Context;
 use libnss::group::Group;
 use libnss::interop::Response;
 
 fn db_to_group(
     db: &mut guest_users_lib::db::DB,
     group: &guest_users_lib::db::models::Group,
-) -> Result<Group, Error> {
+) -> anyhow::Result<Group> {
     let users_in_group = db.find_users_for_group(group)?;
 
     let new_group_obj = Group {
@@ -25,7 +25,7 @@ fn db_to_group(
 
 fn get_ghost_group(
     global_settings: &guest_users_lib::helper::Config,
-) -> Result<Option<Group>, Error> {
+) -> anyhow::Result<Option<Group>> {
     if !global_settings.enable_ghost_user {
         return Ok(None);
     }
@@ -44,7 +44,7 @@ fn get_ghost_group(
 fn get_common_group(
     db: &mut guest_users_lib::db::DB,
     global_settings: &guest_users_lib::helper::Config,
-) -> Result<Group, Error> {
+) -> anyhow::Result<Group> {
     Ok(Group {
         name: global_settings.guest_common_group_name.clone(),
         passwd: "x".to_string(), // disable password for group
@@ -57,7 +57,7 @@ fn get_common_group(
     })
 }
 
-pub fn get_all_entries() -> Result<Response<Vec<Group>>, Error> {
+pub fn get_all_entries() -> anyhow::Result<Response<Vec<Group>>> {
     let global_settings = guest_users_lib::helper::get_config()?;
     let mut db = guest_users_lib::db::DB::new(&global_settings)?;
 
@@ -79,7 +79,7 @@ pub fn get_all_entries() -> Result<Response<Vec<Group>>, Error> {
     Ok(Response::Success(groups))
 }
 
-pub fn get_entry_by_gid(gid: libc::uid_t) -> Result<Response<Group>, Error> {
+pub fn get_entry_by_gid(gid: libc::uid_t) -> anyhow::Result<Response<Group>> {
     let global_settings = guest_users_lib::helper::get_config()?;
     let mut db = guest_users_lib::db::DB::new(&global_settings)?;
 
@@ -103,7 +103,7 @@ pub fn get_entry_by_gid(gid: libc::uid_t) -> Result<Response<Group>, Error> {
     Ok(Response::NotFound)
 }
 
-pub fn get_entry_by_name(name: &str) -> Result<Response<Group>, Error> {
+pub fn get_entry_by_name(name: &str) -> anyhow::Result<Response<Group>> {
     let global_settings = guest_users_lib::helper::get_config()?;
     let mut db = guest_users_lib::db::DB::new(&global_settings)?;
 
