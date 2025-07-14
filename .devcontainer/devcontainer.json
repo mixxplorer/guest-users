@@ -1,0 +1,18 @@
+// README at: https://github.com/devcontainers/templates/tree/main/src/rust
+{
+    "name": "Guest Users Rust",
+    "build": {
+        // Path is relative to the devcontainer.json file.
+        "dockerfile": "Dockerfile"
+    },
+    "customizations": {
+        // Configure properties specific to VS Code.
+        "vscode": {
+            // Add the IDs of extensions you want installed when the container is created.
+            "extensions": [
+                "rust-lang.rust-analyzer",
+                "vadimcn.vscode-lldb"
+            ]
+        }
+    }
+}

@@ -4,7 +4,7 @@ use std::{
     os::raw::c_char,
 };
 
-use anyhow::{Context, Error};
+use anyhow::Context;
 use nix::unistd::Uid;
 use pam::{PamHandle, PamItemType, PamReturnCode};
 
@@ -12,7 +12,7 @@ pub fn account_management(
     handle: &PamHandle,
     _args: Vec<&std::ffi::CStr>,
     _flags: std::os::raw::c_uint,
-) -> Result<PamReturnCode, Error> {
+) -> anyhow::Result<PamReturnCode> {
     let login_user = pam::get_user(handle, Some("login"))?;
     log::trace!("login_user={login_user}");
 
@@ -26,7 +26,7 @@ pub fn account_management(
     Ok(PamReturnCode::Ignore)
 }
 
-fn get_user_from_handle(handle: &mut PamHandle) -> Result<String, Error> {
+fn get_user_from_handle(handle: &mut PamHandle) -> anyhow::Result<String> {
     Ok(
         unsafe { CStr::from_ptr(pam::get_item(handle, PamItemType::User)? as *mut c_char) }
             .to_str()
@@ -39,7 +39,7 @@ pub fn authenticate(
     handle: &mut PamHandle,
     _args: Vec<&std::ffi::CStr>,
     _flags: std::os::raw::c_uint,
-) -> Result<PamReturnCode, Error> {
+) -> anyhow::Result<PamReturnCode> {
     let global_settings = guest_users_lib::helper::get_config()?;
     let guest_username_new_user = &global_settings.guest_username_new_user;
 
@@ -96,7 +96,11 @@ pub fn authenticate(
         }
 
         // prevent logging in users without any running sessions (in order to prevent anyone to log in as a previous guest user if no reboot has happened)
-        if !guest_users_lib::helper::has_active_user_sessions(login_username)? {
+        let has_active_user_sessions = tokio::runtime::Builder::new_current_thread()
+            .enable_io()
+            .build()?
+            .block_on(async { guest_users_lib::helper::has_active_user_sessions(user.id).await })?;
+        if !has_active_user_sessions {
             log::warn!("User has no associated sessions, preventing login!");
             return Ok(PamReturnCode::Auth_Err);
         } else {

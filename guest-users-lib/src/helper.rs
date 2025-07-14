@@ -55,13 +55,16 @@ config_default!(
     guest_username_prefix, String, "guest",
     guest_username_human_readable_prefix, String, "Guest",
     guest_group_name_prefix, String, "guest",
+    enable_guest_common_group, bool, false,
+    guest_common_group_name, String, "guest-users",
+    guest_common_group_gid, gid_t, 31001,
     home_base_path, String, "/home/guest-users",
     home_skel, String, "/etc/skel",
     guest_shell, String, "/bin/bash",
     public_database_path, String, "/etc/guest-users/public.db",
-    uid_minimum, uid_t, 31001,
+    uid_minimum, uid_t, 31010,
     uid_maximum, uid_t, 31999,
-    gid_minimum, gid_t, 31001,
+    gid_minimum, gid_t, 31010,
     gid_maximum, gid_t, 31999,
     guest_user_warning_app_name, String, "Guest User",
     guest_user_warning_title, String, "You are using a guest account",
@@ -174,19 +177,17 @@ pub fn copy_dir_recursive_and_set_owner(
 }
 
 /// Returns whether a user has running/active sessions
-pub fn has_active_user_sessions(user_name: &str) -> anyhow::Result<bool> {
-    let utmp_entries =
-        utmp_rs::parse_from_path("/var/run/utmp").context("Parsing /var/run/utmp failed!")?;
-    let has_session = utmp_entries
+pub async fn has_active_user_sessions(user_id: i64) -> anyhow::Result<bool> {
+    let conn = zbus::Connection::system().await?;
+    let login_interface = crate::zbus::login_manager::LoginManagerProxy::builder(&conn)
+        .build()
+        .await?;
+
+    let sessions = login_interface.list_sessions().await?;
+    let has_session = sessions
         .iter()
-        .filter(|entry| matches!(entry, utmp_rs::UtmpEntry::UserProcess { .. }))
-        .map(|entry| {
-            if let utmp_rs::UtmpEntry::UserProcess { user, .. } = entry {
-                user.as_str()
-            } else {
-                panic!("Invalid utmp entry found after filtering!")
-            }
-        })
-        .any(|user_name_proc| user_name_proc == user_name);
+        .map(|(_sid, uid, _user_name, _seat_id, _session_path)| *uid as i64)
+        .any(|session_user_id| user_id == session_user_id);
+
     Ok(has_session)
 }
