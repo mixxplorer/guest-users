@@ -3,8 +3,14 @@
     "name": "Guest Users Rust",
     "build": {
         // Path is relative to the devcontainer.json file.
-        "dockerfile": "Dockerfile"
+        "dockerfile": "Dockerfile",
+        "args": {
+            "REMOTE_USER": "${localEnv:USER}",
+            "REMOTE_UID": "${localEnv:REMOTE_UID:1000}",
+            "REMOTE_GID": "${localEnv:REMOTE_GID:1000}"
+        }
     },
+    "remoteUser": "${localEnv:USER}",
     "customizations": {
         // Configure properties specific to VS Code.
         "vscode": {
