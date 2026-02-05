@@ -33,4 +33,4 @@ log = "~0.4.27"
 nix = { version = "~0.30.1", features = ["user"] }
 simple_logger = "~5.0.0"
 tokio = { version = "1", features = ["macros", "rt"] }
-zbus = { version = "~5.8.0", features = ["tokio"] }
+zbus = { version = "~5.13.2", features = ["tokio"] }
