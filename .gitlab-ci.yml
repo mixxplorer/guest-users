@@ -1,4 +1,4 @@
-image: dr.rechenknecht.net/bauhelfer/container/main/rust:ubuntu-noble
+image: dr.rechenknecht.net/bauhelfer/container/main/rust:ubuntu-resolute
 
 stages:
   - prepare
@@ -64,6 +64,7 @@ build-rs:amd64:
           - debian-bookworm
           - ubuntu-jammy
           - ubuntu-noble
+          - ubuntu-resolute
   variables:
     RUST_TARGET: "x86_64-unknown-linux-gnu"
   image: dr.rechenknecht.net/bauhelfer/container/main/rust:${DISTRIBUTION}
@@ -96,6 +97,7 @@ build-rs:arm64:
           - debian-bookworm
           - ubuntu-jammy
           - ubuntu-noble
+          - ubuntu-resolute
   variables:
     RUST_TARGET: "aarch64-unknown-linux-gnu"
   image: dr.rechenknecht.net/bauhelfer/container/main/rust:${DISTRIBUTION}-amd64-x-arm64
