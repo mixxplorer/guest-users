@@ -1,13 +1,14 @@
 [Unit]
 Description=Guest Users Guest Warning: Warn guest users about possible data loss
 After=graphical-session.target
-After=dbus.service
-Wants=graphical-session.target
-Wants=dbus.service
+BindsTo=graphical-session.target
+After=dbus.socket
+BindsTo=dbus.socket
 
 [Service]
 ExecStart=/usr/bin/guest-users-guest-warning
 Type=oneshot
+Slice=background.slice
 
 [Install]
 WantedBy=graphical-session.target
