@@ -62,6 +62,7 @@ build-rs:amd64:
     matrix:
       - DISTRIBUTION:
           - debian-bookworm
+          - debian-trixie
           - ubuntu-noble
           - ubuntu-resolute
   variables:
@@ -94,6 +95,7 @@ build-rs:arm64:
     matrix:
       - DISTRIBUTION:
           - debian-bookworm
+          - debian-trixie
           - ubuntu-noble
           - ubuntu-resolute
   variables:
