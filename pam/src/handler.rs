@@ -88,6 +88,11 @@ pub fn authenticate(
             return Ok(PamReturnCode::Auth_Err);
         }
 
+        // prevent re-login of cleaned up users
+        if user.cleaned_up {
+            return Ok(PamReturnCode::Auth_Err);
+        }
+
         // Check whether the login is coming from a root user to prevent other (non-elevated) users to log-in as guest users
         // E.g. only gdm and the user itself should be allowed to (re-)login as a guest user, but not other users
         if !Uid::current().is_root() && Uid::current().as_raw() != u32::try_from(user.id)? {
