@@ -171,6 +171,7 @@ impl<'a> DB<'a> {
             user_name: username.clone(),
             home_path: format!("{home_base_path}/{username}"),
             boot_id: current_boot_id,
+            cleaned_up: false,
         };
 
         crate::helper::ensure_home_base_path(self.global_settings)?;
@@ -229,6 +230,16 @@ impl<'a> DB<'a> {
         use schema::users::dsl::users;
 
         Ok(users.load::<models::User>(&mut self.conn)?)
+    }
+
+    pub fn get_not_cleanup_up_users(&mut self) -> anyhow::Result<Vec<models::User>> {
+        use schema::users::dsl::{cleaned_up, users};
+
+        let result = users
+            .filter(cleaned_up.eq(false))
+            .load::<models::User>(&mut self.conn)?;
+
+        Ok(result)
     }
 
     pub fn find_user_by_id(
@@ -294,5 +305,13 @@ impl<'a> DB<'a> {
         Ok(models::UserGroupMembership::belonging_to(match_group)
             .inner_join(schema::users::dsl::users)
             .load::<(models::UserGroupMembership, models::User)>(&mut self.conn)?)
+    }
+
+    pub fn persist_user(&mut self, user: &models::User) -> anyhow::Result<()> {
+        use schema::users::dsl::users;
+        diesel::update(users.find(user.id))
+            .set(user)
+            .execute(&mut self.conn)?;
+        Ok(())
     }
 }
