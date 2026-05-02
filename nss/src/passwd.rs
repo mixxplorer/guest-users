@@ -72,7 +72,12 @@ pub fn get_all_entries() -> anyhow::Result<Response<Vec<Passwd>>> {
     let global_settings = guest_users_lib::helper::get_config()?;
     let mut db = guest_users_lib::db::DB::new(&global_settings)?;
 
-    let users = db.get_users()?;
+    // only return all users if GUEST_USERS_SHOW_ALL_USERS is set
+    let users = if crate::helper::should_return_all_users() {
+        db.get_users()?
+    } else {
+        db.get_not_cleanup_up_users()?
+    };
 
     let mut passwd_users = Vec::new();
     for user in users.iter() {
