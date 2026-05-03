@@ -245,22 +245,37 @@ impl<'a> DB<'a> {
     pub fn find_user_by_id(
         &mut self,
         uid: nix::libc::uid_t,
+        cleaned_up_option: Option<bool>,
     ) -> anyhow::Result<Option<models::User>> {
-        use schema::users::dsl::{id, users};
+        use schema::users::dsl::{cleaned_up, id, users};
 
-        let result = users
-            .filter(id.eq(Into::<i64>::into(uid)))
+        let mut users_filter = users.into_boxed().filter(id.eq(Into::<i64>::into(uid)));
+
+        if let Some(cleaned_up_value) = cleaned_up_option {
+            users_filter = users_filter.filter(cleaned_up.eq(cleaned_up_value));
+        }
+
+        let result = users_filter
             .first::<models::User>(&mut self.conn)
             .optional()?;
 
         Ok(result)
     }
 
-    pub fn find_user_by_name(&mut self, name: &str) -> anyhow::Result<Option<models::User>> {
-        use schema::users::dsl::{user_name, users};
+    pub fn find_user_by_name(
+        &mut self,
+        name: &str,
+        cleaned_up_option: Option<bool>,
+    ) -> anyhow::Result<Option<models::User>> {
+        use schema::users::dsl::{cleaned_up, user_name, users};
 
-        let result = users
-            .filter(user_name.eq(name))
+        let mut users_filter = users.into_boxed().filter(user_name.eq(name));
+
+        if let Some(cleaned_up_value) = cleaned_up_option {
+            users_filter = users_filter.filter(cleaned_up.eq(cleaned_up_value));
+        }
+
+        let result = users_filter
             .first::<models::User>(&mut self.conn)
             .optional()?;
 

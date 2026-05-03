@@ -4,11 +4,13 @@
 
 This project offers a guest user support for Linux devices using the [PAM framework](https://github.com/linux-pam/linux-pam) as well as the [GNU nss framework](https://www.gnu.org/software/libc/manual/html_node/Name-Service-Switch.html).
 
-It offers a username (specified via `guest_username_new_user`, default `guest`), which creates a new user on the fly for a guest account. Per guest login a new user account will be created in order to achieve separation of guest users. These accounts will be hidden from most GUI parts of the system, but will exist as long as the guest-users package is installed in order to prevent uid/gid re-use.
+It offers a username (specified via `guest_username_new_user`, default `guest`), which creates a new user on the fly for a guest account. Per guest login a new user account will be created in order to achieve separation of guest users. These accounts will be hidden from most GUI parts of the system, but will exist as long as the guest-users package is installed in order to prevent uid/gid re-use. To hide the users in more GUI parts, please take a look at the configuration section (`cleaned_up_user_behavior`).
 
 To log in, just click on the Guest user entry on the login screen or use `guest` as username (configurable via `guest_username_new_user`):
 
 ![Gnome login screen with guest-users installed](docs/login_screenshot.png)
+
+When a guest user session ends, the user files will be cleaned up automatically.
 
 ## Installation
 
@@ -82,6 +84,7 @@ You can set the following configuration options:
 | `uid_maximum` | `31999` | Maximum UID for guest users (make sure these IDs are and will be really available) |
 | `gid_minimum` | `31010` | Minimum GID for individual default groups of guest users (make sure these IDs are and will be really available) |
 | `gid_maximum` | `31999` | Maximum GID for individual default groups of guest users (make sure these IDs are and will be really available) |
+| `nss_cleaned_up_user_behavior` | `show` | Strategy to use after a guest user account got cleaned up. This setting might be advantageous to hide users in more parts of the UI. Setting `show` cleaned up users will be shown via `nss` normally. `hide` will hide users completly via `nss` once cleaned up. `hide_in_lists` means the user will not be shown in the user lists of `nss` but will still produce valid result for requesting the user name or id. To retrieve all guest users regardless of this setting, set the `GUEST_USERS_SHOW_ALL_USERS` environment variable when calling the `nss` lib. |
 | `guest_user_warning_app_name` | `Guest User` | App name shown in notifications starting with Gnome 46 |
 | `guest_user_warning_title` | `You are using a guest account` | Title of warning message guest users are shown after logging in |
 | `guest_user_warning_body` | `All data will be deleted on logout. Make sure to store your data on a safe location apart from this device.` | Body of warning message guest users are shown after logging in |

@@ -72,11 +72,13 @@ pub fn get_all_entries() -> anyhow::Result<Response<Vec<Passwd>>> {
     let global_settings = guest_users_lib::helper::get_config()?;
     let mut db = guest_users_lib::db::DB::new(&global_settings)?;
 
-    // only return all users if GUEST_USERS_SHOW_ALL_USERS is set
-    let users = if crate::helper::should_return_all_users() {
-        db.get_users()?
-    } else {
+    let users = if global_settings
+        .nss_cleaned_up_user_behavior
+        .should_hide_in_lists()
+    {
         db.get_not_cleanup_up_users()?
+    } else {
+        db.get_users()?
     };
 
     let mut passwd_users = Vec::new();
@@ -95,7 +97,11 @@ pub fn get_entry_by_uid(uid: libc::uid_t) -> anyhow::Result<Response<Passwd>> {
     let global_settings = guest_users_lib::helper::get_config()?;
     let mut db = guest_users_lib::db::DB::new(&global_settings)?;
 
-    if let Some(user) = db.find_user_by_id(uid)? {
+    let cleaned_up_option = global_settings
+        .nss_cleaned_up_user_behavior
+        .should_hide()
+        .then_some(false);
+    if let Some(user) = db.find_user_by_id(uid, cleaned_up_option)? {
         return Ok(Response::Success(db_to_passwd(&global_settings, &user)?));
     }
 
@@ -112,7 +118,11 @@ pub fn get_entry_by_name(name: &str) -> anyhow::Result<Response<Passwd>> {
     let global_settings = guest_users_lib::helper::get_config()?;
     let mut db = guest_users_lib::db::DB::new(&global_settings)?;
 
-    if let Some(user) = db.find_user_by_name(name)? {
+    let cleaned_up_option = global_settings
+        .nss_cleaned_up_user_behavior
+        .should_hide()
+        .then_some(false);
+    if let Some(user) = db.find_user_by_name(name, cleaned_up_option)? {
         return Ok(Response::Success(db_to_passwd(&global_settings, &user)?));
     }
 
