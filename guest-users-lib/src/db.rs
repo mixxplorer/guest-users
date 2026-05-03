@@ -42,6 +42,9 @@ impl<'a> DB<'a> {
         diesel::sql_query("PRAGMA foreign_keys = ON").execute(&mut conn)?;
         log::trace!("Enabled foreign key check on DB");
 
+        // enable busy waiting to allow sequential, concurrent accessors
+        diesel::sql_query("PRAGMA busy_timeout = 1000").execute(&mut conn)?;
+
         // we use geteuid as when a user authenticates from itself (e.g. sudo) we are running under the users name but effectively as root
         if geteuid().is_root() {
             let root_setup_res = Self::root_setup(&mut conn, database_url);
