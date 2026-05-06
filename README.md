@@ -18,16 +18,22 @@ This project is currently tested with Ubuntu 24.04 (noble), 22.04 (jammy) and De
 
 Depending on your distribution, you can add an apt repository like this:
 
+Ubuntu 26.04 (resolute):
+
+```bash
+echo "deb [trusted=yes] https://mixxplorer.pages.rechenknecht.net/guest-users/packages ubuntu-resolute stable" > /etc/apt/sources.list.d/guest-users.list
+```
+
 Ubuntu 24.04 (noble):
 
 ```bash
 echo "deb [trusted=yes] https://mixxplorer.pages.rechenknecht.net/guest-users/packages ubuntu-noble stable" > /etc/apt/sources.list.d/guest-users.list
 ```
 
-Ubuntu 22.04 (jammy):
+Debian 13 (Trixie)
 
 ```bash
-echo "deb [trusted=yes] https://mixxplorer.pages.rechenknecht.net/guest-users/packages ubuntu-jammy stable" > /etc/apt/sources.list.d/guest-users.list
+echo "deb [trusted=yes] https://mixxplorer.pages.rechenknecht.net/guest-users/packages debian-trixie stable" > /etc/apt/sources.list.d/guest-users.list
 ```
 
 Debian 12 (Bookworm)

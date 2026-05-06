@@ -1,4 +1,4 @@
-image: dr.rechenknecht.net/bauhelfer/container/main/rust:ubuntu-noble
+image: dr.rechenknecht.net/bauhelfer/container/main/rust:ubuntu-resolute
 
 stages:
   - prepare
@@ -9,7 +9,7 @@ stages:
 variables:
   # This will instruct Docker not to start over TLS.
   DOCKER_TLS_CERTDIR: ""
-  PACKAGE_BASE_VERSION: "0.4"
+  PACKAGE_BASE_VERSION: "0.5"
 
 prepare-rs:
   stage: prepare
@@ -62,8 +62,9 @@ build-rs:amd64:
     matrix:
       - DISTRIBUTION:
           - debian-bookworm
-          - ubuntu-jammy
+          - debian-trixie
           - ubuntu-noble
+          - ubuntu-resolute
   variables:
     RUST_TARGET: "x86_64-unknown-linux-gnu"
   image: dr.rechenknecht.net/bauhelfer/container/main/rust:${DISTRIBUTION}
@@ -94,8 +95,9 @@ build-rs:arm64:
     matrix:
       - DISTRIBUTION:
           - debian-bookworm
-          - ubuntu-jammy
+          - debian-trixie
           - ubuntu-noble
+          - ubuntu-resolute
   variables:
     RUST_TARGET: "aarch64-unknown-linux-gnu"
   image: dr.rechenknecht.net/bauhelfer/container/main/rust:${DISTRIBUTION}-amd64-x-arm64

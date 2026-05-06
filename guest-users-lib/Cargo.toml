@@ -23,6 +23,7 @@ section = "utility"
 priority = "optional"
 assets = [
     ["deb-raw/etc/apparmor.d/abstractions/authentication.d/guest-users", "etc/apparmor.d/abstractions/authentication.d/guest-users", "644"],
+    ["deb-raw/etc/apparmor.d/abstractions/nameservice.d/guest-users", "etc/apparmor.d/abstractions/nameservice.d/guest-users", "644"],
     ["deb-raw/etc/apparmor.d/cups-client.d/guest-users", "etc/apparmor.d/cups-client.d/guest-users", "644"],
 ]
 
