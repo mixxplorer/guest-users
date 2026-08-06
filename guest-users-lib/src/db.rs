@@ -168,7 +168,7 @@ impl<'a> DB<'a> {
         // Ensure home directory of guest user does not already exist
         // An attacker could try to create the directory and place some code, which gets executed during login otherwise.
         if Path::new(&target_user.home_path).exists() {
-            bail!("Home path {} already exists", &target_user.home_path);
+            bail!("Home path {} already exists", target_user.home_path);
         }
 
         std::fs::create_dir_all(&target_user.home_path)?;
