@@ -48,7 +48,7 @@ async fn session_end_listener() -> anyhow::Result<()> {
                         // notify accountservice
                         log::info!(
                             "Notifying account service to uncache user {}",
-                            &user.user_name
+                            user.user_name
                         );
                         let accounts_server_interface =
                             guest_users_lib::zbus::accounts_service::AccountsProxy::builder(
@@ -70,7 +70,7 @@ async fn session_end_listener() -> anyhow::Result<()> {
                     } else {
                         log::info!(
                             "Skipping user {} as the user still has an active session.",
-                            &user.user_name
+                            user.user_name
                         );
                     }
                 }
