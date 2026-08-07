@@ -44,26 +44,36 @@ impl<'a> DB<'a> {
 
         // we use geteuid as when a user authenticates from itself (e.g. sudo) we are running under the users name but effectively as root
         if geteuid().is_root() {
-            log::debug!("Setting permissions on database");
-            chown(
-                Path::new(&database_url),
-                Some(Uid::from_raw(0)),
-                Some(Gid::from_raw(0)),
-            )?;
-            set_permissions(Path::new(&database_url), PermissionsExt::from_mode(0o644))?;
-        }
-
-        // run migrations
-        {
-            const MIGRATIONS: diesel_migrations::EmbeddedMigrations =
-                diesel_migrations::embed_migrations!("./migrations");
-            conn.run_pending_migrations(MIGRATIONS).unwrap();
+            let root_setup_res = Self::root_setup(&mut conn, database_url);
+            if let Err(err) = root_setup_res {
+                log::warn!("DB root setup has failed: {:#}", err);
+            }
         }
 
         Ok(Self {
             conn,
             global_settings,
         })
+    }
+
+    fn root_setup(
+        conn: &mut diesel::SqliteConnection,
+        database_url: &String,
+    ) -> anyhow::Result<()> {
+        log::debug!("Setting permissions on database");
+        chown(
+            Path::new(&database_url),
+            Some(Uid::from_raw(0)),
+            Some(Gid::from_raw(0)),
+        )?;
+        set_permissions(Path::new(&database_url), PermissionsExt::from_mode(0o644))?;
+
+        // run migrations
+        const MIGRATIONS: diesel_migrations::EmbeddedMigrations =
+            diesel_migrations::embed_migrations!("./migrations");
+        conn.run_pending_migrations(MIGRATIONS).unwrap();
+
+        Ok(())
     }
 
     fn find_next_unused_user_id_and_name(&mut self) -> anyhow::Result<(i64, String)> {
