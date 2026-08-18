@@ -185,3 +185,7 @@ Currently, guest users will only be disabled but not removed. Guest users might 
 For specific use cases it might make sense to release ids at some point. E.g. if you reset your systems on a regular basis, you might just delete the database, which also releases all claimed IDs.
 
 The user home directories will be removed by the [guest-users-cleanup-daemon]('cleanup-daemon') once users do not have any processes left.
+
+## Support development ❤️
+
+The development is mainly funded by [Mixxplorer](https://mixxplorer.de) and [Gesellschaft für interkulturelles Zusammenleben gGmbH](https://giz.berlin). If you're able to support our work, please consider sponsoring us or encouraging your organization to have [Mixxplorer](https://mixxplorer.de) implement free software projects like this one.
