@@ -12,6 +12,16 @@ To log in, just click on the Guest user entry on the login screen or use `guest`
 
 When a guest user session ends, the user files will be cleaned up automatically.
 
+## Supported distributions and display managers
+
+This project hooks into the [`PAM`](https://github.com/linux-pam/linux-pam) and [`NSS`](https://www.gnu.org/software/libc/manual/html_node/Name-Service-Switch.html) libraries via their public APIs. Therefore, all distributions and display managers using these display managers should be supported. However, guest users are a specific edge case and not all display managers support every aspect of it.
+
+We tested these display managers:
+
+* [`gdm`](https://gitlab.gnome.org/GNOME/gdm) on Debian and Ubuntu (our main devlopment target)
+* [`ligthdm`](https://github.com/ubuntu/lightdm) on Debian
+* [`sddm`](https://github.com/sddm/sddm) on Debian
+
 ## Installation
 
 This project is currently tested with Ubuntu 24.04 (noble), 22.04 (jammy) and Debian Bookworm. Both `amd64` and `arm64` architectures are supported.
@@ -20,29 +30,33 @@ This project is currently tested with Ubuntu 24.04 (noble), 22.04 (jammy) and De
 
 Depending on your distribution, you can add an apt repository like this:
 
-Ubuntu 26.04 (resolute):
+#### Package source
+
+##### Ubuntu 26.04 (resolute)
 
 ```bash
 echo "deb [trusted=yes] https://mixxplorer.pages.rechenknecht.net/guest-users/packages ubuntu-resolute stable" > /etc/apt/sources.list.d/guest-users.list
 ```
 
-Ubuntu 24.04 (noble):
+##### Ubuntu 24.04 (noble)
 
 ```bash
 echo "deb [trusted=yes] https://mixxplorer.pages.rechenknecht.net/guest-users/packages ubuntu-noble stable" > /etc/apt/sources.list.d/guest-users.list
 ```
 
-Debian 13 (Trixie)
+##### Debian 13 (Trixie)
 
 ```bash
 echo "deb [trusted=yes] https://mixxplorer.pages.rechenknecht.net/guest-users/packages debian-trixie stable" > /etc/apt/sources.list.d/guest-users.list
 ```
 
-Debian 12 (Bookworm)
+##### Debian 12 (Bookworm)
 
 ```bash
 echo "deb [trusted=yes] https://mixxplorer.pages.rechenknecht.net/guest-users/packages debian-bookworm stable" > /etc/apt/sources.list.d/guest-users.list
 ```
+
+#### Installing packages
 
 Afterwards, you can install the corresponding packages:
 
