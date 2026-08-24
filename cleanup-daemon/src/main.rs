@@ -34,7 +34,7 @@ async fn session_end_listener() -> anyhow::Result<()> {
         // We chose the second option to prevent data duplication (and therefore nasty bugs).
 
         let mut db = guest_users_lib::db::DB::new(&global_config)?;
-        for mut user in db.get_not_cleanup_up_users()? {
+        for mut user in db.get_users(Some(false))? {
             // check if user has a session
             if !guest_users_lib::helper::has_active_user_sessions(user.id).await? {
                 let cleanup_result =

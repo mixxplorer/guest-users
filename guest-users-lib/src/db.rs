@@ -229,20 +229,19 @@ impl<'a> DB<'a> {
         Ok(target_user)
     }
 
-    pub fn get_users(&mut self) -> anyhow::Result<Vec<models::User>> {
-        use schema::users::dsl::users;
-
-        Ok(users.load::<models::User>(&mut self.conn)?)
-    }
-
-    pub fn get_not_cleanup_up_users(&mut self) -> anyhow::Result<Vec<models::User>> {
+    pub fn get_users(
+        &mut self,
+        cleaned_up_option: Option<bool>,
+    ) -> anyhow::Result<Vec<models::User>> {
         use schema::users::dsl::{cleaned_up, users};
 
-        let result = users
-            .filter(cleaned_up.eq(false))
-            .load::<models::User>(&mut self.conn)?;
-
-        Ok(result)
+        if let Some(cleaned_up_value) = cleaned_up_option {
+            Ok(users
+                .filter(cleaned_up.eq(cleaned_up_value))
+                .load::<models::User>(&mut self.conn)?)
+        } else {
+            Ok(users.load::<models::User>(&mut self.conn)?)
+        }
     }
 
     pub fn find_user_by_id(

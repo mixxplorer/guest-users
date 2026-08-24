@@ -45,12 +45,21 @@ fn get_common_group(
     db: &mut guest_users_lib::db::DB,
     global_settings: &guest_users_lib::helper::Config,
 ) -> anyhow::Result<Group> {
+    let cleaned_up_filter = if global_settings
+        .nss_cleaned_up_user_behavior
+        .should_hide_in_lists()
+    {
+        Some(false)
+    } else {
+        None
+    };
+
     Ok(Group {
         name: global_settings.guest_common_group_name.clone(),
         passwd: "x".to_string(), // disable password for group
         gid: global_settings.guest_common_group_gid,
         members: db
-            .get_users()?
+            .get_users(cleaned_up_filter)?
             .iter()
             .map(|user| user.user_name.clone())
             .collect(),

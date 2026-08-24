@@ -61,14 +61,16 @@ pub fn get_all_entries() -> anyhow::Result<Response<Vec<Shadow>>> {
     let global_settings = guest_users_lib::helper::get_config()?;
     let mut db = guest_users_lib::db::DB::new(&global_settings)?;
 
-    let users = if global_settings
+    let cleaned_up_filter = if global_settings
         .nss_cleaned_up_user_behavior
         .should_hide_in_lists()
     {
-        db.get_not_cleanup_up_users()?
+        Some(false)
     } else {
-        db.get_users()?
+        None
     };
+
+    let users = db.get_users(cleaned_up_filter)?;
 
     let mut shadow_users = Vec::new();
     for user in users.iter() {
