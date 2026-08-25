@@ -42,6 +42,9 @@ impl<'a> DB<'a> {
         diesel::sql_query("PRAGMA foreign_keys = ON").execute(&mut conn)?;
         log::trace!("Enabled foreign key check on DB");
 
+        // enable busy waiting to allow sequential, concurrent accessors
+        diesel::sql_query("PRAGMA busy_timeout = 1000").execute(&mut conn)?;
+
         // we use geteuid as when a user authenticates from itself (e.g. sudo) we are running under the users name but effectively as root
         if geteuid().is_root() {
             let root_setup_res = Self::root_setup(&mut conn, database_url);
@@ -171,6 +174,7 @@ impl<'a> DB<'a> {
             user_name: username.clone(),
             home_path: format!("{home_base_path}/{username}"),
             boot_id: current_boot_id,
+            cleaned_up: false,
         };
 
         crate::helper::ensure_home_base_path(self.global_settings)?;
@@ -225,31 +229,55 @@ impl<'a> DB<'a> {
         Ok(target_user)
     }
 
-    pub fn get_users(&mut self) -> anyhow::Result<Vec<models::User>> {
-        use schema::users::dsl::users;
+    pub fn get_users(
+        &mut self,
+        cleaned_up_option: Option<bool>,
+    ) -> anyhow::Result<Vec<models::User>> {
+        use schema::users::dsl::{cleaned_up, users};
 
-        Ok(users.load::<models::User>(&mut self.conn)?)
+        if let Some(cleaned_up_value) = cleaned_up_option {
+            Ok(users
+                .filter(cleaned_up.eq(cleaned_up_value))
+                .load::<models::User>(&mut self.conn)?)
+        } else {
+            Ok(users.load::<models::User>(&mut self.conn)?)
+        }
     }
 
     pub fn find_user_by_id(
         &mut self,
         uid: nix::libc::uid_t,
+        cleaned_up_option: Option<bool>,
     ) -> anyhow::Result<Option<models::User>> {
-        use schema::users::dsl::{id, users};
+        use schema::users::dsl::{cleaned_up, id, users};
 
-        let result = users
-            .filter(id.eq(Into::<i64>::into(uid)))
+        let mut users_filter = users.into_boxed().filter(id.eq(Into::<i64>::into(uid)));
+
+        if let Some(cleaned_up_value) = cleaned_up_option {
+            users_filter = users_filter.filter(cleaned_up.eq(cleaned_up_value));
+        }
+
+        let result = users_filter
             .first::<models::User>(&mut self.conn)
             .optional()?;
 
         Ok(result)
     }
 
-    pub fn find_user_by_name(&mut self, name: &str) -> anyhow::Result<Option<models::User>> {
-        use schema::users::dsl::{user_name, users};
+    pub fn find_user_by_name(
+        &mut self,
+        name: &str,
+        cleaned_up_option: Option<bool>,
+    ) -> anyhow::Result<Option<models::User>> {
+        use schema::users::dsl::{cleaned_up, user_name, users};
 
-        let result = users
-            .filter(user_name.eq(name))
+        let mut users_filter = users.into_boxed().filter(user_name.eq(name));
+
+        if let Some(cleaned_up_value) = cleaned_up_option {
+            users_filter = users_filter.filter(cleaned_up.eq(cleaned_up_value));
+        }
+
+        let result = users_filter
             .first::<models::User>(&mut self.conn)
             .optional()?;
 
@@ -294,5 +322,13 @@ impl<'a> DB<'a> {
         Ok(models::UserGroupMembership::belonging_to(match_group)
             .inner_join(schema::users::dsl::users)
             .load::<(models::UserGroupMembership, models::User)>(&mut self.conn)?)
+    }
+
+    pub fn persist_user(&mut self, user: &models::User) -> anyhow::Result<()> {
+        use schema::users::dsl::users;
+        diesel::update(users.find(user.id))
+            .set(user)
+            .execute(&mut self.conn)?;
+        Ok(())
     }
 }

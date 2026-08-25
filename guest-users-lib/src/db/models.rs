@@ -14,6 +14,9 @@ pub struct User {
     pub user_group_id: i64,
     pub home_path: String,
     pub boot_id: String,
+    /// Whether the user is cleaned up (home directory removed etc.).
+    /// Might be used to decide whether to hide a user from password (nss) databases
+    pub cleaned_up: bool,
 }
 
 #[derive(Identifiable, Insertable, AsChangeset, Queryable, Debug, Clone)]

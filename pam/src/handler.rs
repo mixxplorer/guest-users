@@ -19,7 +19,7 @@ pub fn account_management(
     let global_settings = guest_users_lib::helper::get_config()?;
     let mut db = guest_users_lib::db::DB::new(&global_settings)?;
 
-    if db.find_user_by_name(login_user)?.is_some() {
+    if db.find_user_by_name(login_user, None)?.is_some() {
         return Ok(PamReturnCode::Success);
     }
 
@@ -81,7 +81,7 @@ pub fn authenticate(
             return Ok(PamReturnCode::Service_Err);
         }
         Ok(PamReturnCode::Success)
-    } else if let Some(user) = db.find_user_by_name(login_username)? {
+    } else if let Some(user) = db.find_user_by_name(login_username, Some(false))? {
         // we found the guest user
         // as guest users do not have any password, we just let them through if the boot id is still the same (system did not reboot)
         if user.boot_id != guest_users_lib::helper::get_current_os_boot_id()? {

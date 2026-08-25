@@ -8,7 +8,8 @@ fn db_to_shadow(user: &guest_users_lib::db::models::User) -> anyhow::Result<Shad
 
     tokio_runtime.block_on(async {
         let passwd = {
-            if guest_users_lib::helper::get_current_os_boot_id()? == user.boot_id
+            if !user.cleaned_up
+                && guest_users_lib::helper::get_current_os_boot_id()? == user.boot_id
                 && guest_users_lib::helper::has_active_user_sessions(user.id)
                     .await
                     .unwrap_or(false)
@@ -60,7 +61,16 @@ pub fn get_all_entries() -> anyhow::Result<Response<Vec<Shadow>>> {
     let global_settings = guest_users_lib::helper::get_config()?;
     let mut db = guest_users_lib::db::DB::new(&global_settings)?;
 
-    let users = db.get_users()?;
+    let cleaned_up_filter = if global_settings
+        .nss_cleaned_up_user_behavior
+        .should_hide_in_lists()
+    {
+        Some(false)
+    } else {
+        None
+    };
+
+    let users = db.get_users(cleaned_up_filter)?;
 
     let mut shadow_users = Vec::new();
     for user in users.iter() {
@@ -78,7 +88,11 @@ pub fn get_entry_by_name(name: &str) -> anyhow::Result<Response<Shadow>> {
     let global_settings = guest_users_lib::helper::get_config()?;
     let mut db = guest_users_lib::db::DB::new(&global_settings)?;
 
-    if let Some(user) = db.find_user_by_name(name)? {
+    let cleaned_up_option = global_settings
+        .nss_cleaned_up_user_behavior
+        .should_hide()
+        .then_some(false);
+    if let Some(user) = db.find_user_by_name(name, cleaned_up_option)? {
         return Ok(Response::Success(db_to_shadow(&user)?));
     }
 

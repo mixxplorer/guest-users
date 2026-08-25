@@ -13,7 +13,7 @@ struct Args {
 }
 
 async fn session_end_listener() -> anyhow::Result<()> {
-    let global_settings = guest_users_lib::helper::get_config()?;
+    let global_config = guest_users_lib::helper::get_config()?;
 
     let system_connection = zbus::Connection::system().await?;
     let login_interface =
@@ -33,50 +33,66 @@ async fn session_end_listener() -> anyhow::Result<()> {
         // 2. Look up which sessions are running after receiving an session end event and just try to clean up all users, which do not have a session
         // We chose the second option to prevent data duplication (and therefore nasty bugs).
 
-        let mut db = guest_users_lib::db::DB::new(&global_settings)?;
-        for user in db.get_users()? {
-            // check if home directory of user still exists
-            let home_path = std::path::Path::new(&user.home_path);
-            if home_path.exists() {
-                // failsafe: check whether this path is in home base directory
-                let home_base_path = std::path::Path::new(&global_settings.home_base_path);
-                if !home_path.starts_with(home_base_path) {
-                    log::warn!("{home_path:?} not in home_base_path={home_base_path:?}, skipping deletion!")
+        let mut db = guest_users_lib::db::DB::new(&global_config)?;
+        for mut user in db.get_users(Some(false))? {
+            // check if user has a session
+            if !guest_users_lib::helper::has_active_user_sessions(user.id).await? {
+                let cleanup_result =
+                    cleanup_user(&mut user, &system_connection, &global_config).await;
+                if let Err(error) = cleanup_result {
+                    log::error!("Error during user cleanup of {}: {:?}", user.id, error);
                 } else {
-                    // check if user has a session
-                    if !guest_users_lib::helper::has_active_user_sessions(user.id).await? {
-                        // notify accountservice
-                        log::info!(
-                            "Notifying account service to uncache user {}",
-                            user.user_name
-                        );
-                        let accounts_server_interface =
-                            guest_users_lib::zbus::accounts_service::AccountsProxy::builder(
-                                &system_connection,
-                            )
-                            .build()
-                            .await?;
-                        accounts_server_interface
-                            .uncache_user(&user.user_name)
-                            .await?;
-
-                        log::info!(
-                            "Removing home directory {home_path:?} of user {}",
-                            user.user_name
-                        );
-                        std::fs::remove_dir_all(home_path).with_context(|| {
-                            format!("Removing home directory of {} failed!", user.user_name)
-                        })?;
-                    } else {
-                        log::info!(
-                            "Skipping user {} as the user still has an active session.",
-                            user.user_name
-                        );
-                    }
+                    // Ensure updated user in cleanup_user gets persisted
+                    db.persist_user(&user)?;
                 }
+            } else {
+                log::info!(
+                    "Skipping user {} as the user still has an active session.",
+                    user.user_name
+                );
             }
         }
     }
+    Ok(())
+}
+
+async fn cleanup_user(
+    user: &mut guest_users_lib::db::models::User,
+    system_connection: &zbus::Connection,
+    global_config: &guest_users_lib::helper::Config,
+) -> anyhow::Result<()> {
+    // notify accountservice
+    log::info!(
+        "Notifying account service to uncache user {}",
+        user.user_name
+    );
+    let accounts_server_interface =
+        guest_users_lib::zbus::accounts_service::AccountsProxy::builder(system_connection)
+            .build()
+            .await?;
+    accounts_server_interface
+        .uncache_user(&user.user_name)
+        .await?;
+
+    // check if home directory of user still exists
+    let home_path = std::path::Path::new(&user.home_path);
+    if home_path.exists() {
+        // failsafe: check whether this path is in home base directory
+        let home_base_path = std::path::Path::new(&global_config.home_base_path);
+        if !home_path.starts_with(home_base_path) {
+            log::warn!("{home_path:?} not in home_base_path={home_base_path:?}, skipping deletion!")
+        } else {
+            log::info!(
+                "Removing home directory {home_path:?} of user {}",
+                user.user_name
+            );
+            std::fs::remove_dir_all(home_path).with_context(|| {
+                format!("Removing home directory of {} failed!", user.user_name)
+            })?;
+        }
+    }
+    user.cleaned_up = true;
+
     Ok(())
 }
 

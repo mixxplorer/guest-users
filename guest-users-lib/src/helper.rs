@@ -19,6 +19,9 @@ macro_rules! config_default_item {
     ( $z:expr, $a:ident, bool ) => {
         $z.get_bool(stringify!($a))?
     };
+    ( $z:expr, $a:ident, NssCleanedUpUserBehavior ) => {
+        std::convert::TryInto::<NssCleanedUpUserBehavior>::try_into($z.get_string(stringify!($a))?)?
+    };
 }
 
 /// Wrapper for having a config object pre-filled with default values when building via Config::default from a ConfigBuilder
@@ -66,6 +69,7 @@ config_default!(
     uid_maximum, uid_t, 31999,
     gid_minimum, gid_t, 31010,
     gid_maximum, gid_t, 31999,
+    nss_cleaned_up_user_behavior, NssCleanedUpUserBehavior, "show",
     guest_user_warning_app_name, String, "Guest User",
     guest_user_warning_title, String, "You are using a guest account",
     guest_user_warning_body, String, "All data will be deleted on logout. Make sure to store your data on a safe location apart from this device.",
@@ -74,6 +78,53 @@ config_default!(
     ghost_user_uid, i64, 31000,
     ghost_user_gid, i64, 31000
 );
+
+/// Specifies the behavior of the nss module for cleaned up users
+pub enum NssCleanedUpUserBehavior {
+    /// Show cleaned up users always
+    Show,
+    /// Hide cleaned up users always
+    Hide,
+    /// Hide cleaned up users in lists but show them for uid and username requests
+    HideInLists,
+}
+
+impl std::convert::TryFrom<String> for NssCleanedUpUserBehavior {
+    type Error = anyhow::Error;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        // Shortcut to skip parsing the config when the overrride env is set
+        if std::env::var_os("GUEST_USERS_SHOW_ALL_USERS").is_some() {
+            return Ok(NssCleanedUpUserBehavior::Show);
+        }
+        Ok(match value.as_str() {
+            "show" => NssCleanedUpUserBehavior::Show,
+            "hide" => NssCleanedUpUserBehavior::Hide,
+            "hide_in_lists" => NssCleanedUpUserBehavior::HideInLists,
+            _ => {
+                anyhow::bail!("Invalid setting for NssCleanedUpUserBehavior. Allowed are 'show', 'hide', 'hide_in_lists'.");
+            }
+        })
+    }
+}
+
+impl NssCleanedUpUserBehavior {
+    pub fn should_hide(&self) -> bool {
+        match self {
+            NssCleanedUpUserBehavior::Show => false,
+            NssCleanedUpUserBehavior::Hide => true,
+            NssCleanedUpUserBehavior::HideInLists => false,
+        }
+    }
+
+    pub fn should_hide_in_lists(&self) -> bool {
+        match self {
+            NssCleanedUpUserBehavior::Show => false,
+            NssCleanedUpUserBehavior::Hide => true,
+            NssCleanedUpUserBehavior::HideInLists => true,
+        }
+    }
+}
 
 pub fn get_config() -> anyhow::Result<Config> {
     let mut builder = config::Config::builder();
